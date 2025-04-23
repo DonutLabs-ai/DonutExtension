@@ -1,5 +1,6 @@
 import * as styles from "../../styles/index.module.scss";
 import React, { useState } from "react";
+import { createRoot } from "react-dom/client";
 import {
   AnimatePresence,
   AnimateSharedLayout,
@@ -215,39 +216,37 @@ function ThemeSwitcher() {
       >
         ←
       </motion.span>
-      <AnimateSharedLayout>
-        {themes.map(({ key, icon }) => {
-          const isActive = theme === key;
-          return (
-            <button
-              ref={ref}
-              key={key}
-              data-selected={isActive}
-              onClick={() => {
-                setTheme(key);
-                if (showArrowKeyHint === false) {
-                  setShowArrowKeyHint(true);
-                }
-              }}
-            >
-              {icon}
-              {key}
-              {isActive && (
-                <motion.div
-                  layoutId="activeTheme"
-                  transition={{
-                    type: "spring",
-                    stiffness: 250,
-                    damping: 27,
-                    mass: 1,
-                  }}
-                  className={styles.activeTheme}
-                />
-              )}
-            </button>
-          );
-        })}
-      </AnimateSharedLayout>
+      {themes.map(({ key, icon }) => {
+        const isActive = theme === key;
+        return (
+          <button
+            ref={ref}
+            key={key}
+            data-selected={isActive}
+            onClick={() => {
+              setTheme(key);
+              if (showArrowKeyHint === false) {
+                setShowArrowKeyHint(true);
+              }
+            }}
+          >
+            {icon}
+            {key}
+            {isActive && (
+              <motion.div
+                layoutId="activeTheme"
+                transition={{
+                  type: "spring",
+                  stiffness: 250,
+                  damping: 27,
+                  mass: 1,
+                }}
+                className={styles.activeTheme}
+              />
+            )}
+          </button>
+        );
+      })}
       <motion.span
         className={styles.arrow}
         initial={false}
@@ -388,4 +387,13 @@ function PacoSignature() {
       />
     </motion.svg>
   );
+}
+
+const container = document.getElementById("app-container");
+
+if (container) {
+  const root = createRoot(container);
+  root.render(<Index />);
+} else {
+  console.log("no container");
 }

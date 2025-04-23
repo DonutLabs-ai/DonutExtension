@@ -228,7 +228,7 @@ var options = {
       cache: false,
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "pages", "Content", "index.tsx"),
+      template: path.join(__dirname, "src", "pages", "Content", "index.html"),
       filename: "content.html",
       chunks: ["content"],
       cache: false,
