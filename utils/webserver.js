@@ -34,7 +34,7 @@ var server = new WebpackDevServer(
     },
     webSocketServer: "sockjs",
     host: "localhost",
-    open: ["http://localhost:3000/content.html"],
+    open: ["http://localhost:3000/popup.html"],
     port: env.PORT,
     static: {
       directory: path.join(__dirname, "../build"),

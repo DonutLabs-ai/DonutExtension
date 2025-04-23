@@ -3,7 +3,7 @@
   "name": "Donut Extension",
   "options_page": "options.html",
   "action": {
-    "default_popup": "content.html",
+    "default_popup": "popup.html",
     "default_icon": "icon-34.png"
   },
   "permissions": ["storage"],
