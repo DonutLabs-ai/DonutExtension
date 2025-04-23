@@ -7,7 +7,6 @@ var webpack = require("webpack"),
   TerserPlugin = require("terser-webpack-plugin");
 var { CleanWebpackPlugin } = require("clean-webpack-plugin");
 var ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
-var ReactRefreshTypeScript = require("react-refresh-typescript").default;
 
 const ASSET_PATH = process.env.ASSET_PATH || "/";
 
@@ -38,17 +37,13 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 var options = {
   mode: process.env.NODE_ENV || "development",
   entry: {
-    options: path.join(__dirname, "src", "pages", "Options", "index.tsx"),
-    background: path.join(__dirname, "src", "pages", "Background", "index.ts"),
-    contentScript: path.join(__dirname, "src", "pages", "Content", "index.ts"),
-    devtools: path.join(__dirname, "src", "pages", "Devtools", "index.ts"),
-    panel: path.join(__dirname, "src", "pages", "Panel", "index.tsx"),
+    content: path.join(__dirname, "src", "pages", "Content", "index.tsx"),
+    popup: path.join(__dirname, "src", "pages", "Popup", "index.html"),
+    options: path.join(__dirname, "src", "pages", "Options", "index.html"),
   },
-  chromeExtensionBoilerplate: {
-    notHotReload: ["background", "contentScript", "devtools"],
-  },
+  chromeExtensionBoilerplate: {},
   output: {
-    filename: "[name].bundle.js",
+    filename: "[name].js",
     path: path.resolve(__dirname, "build"),
     clean: true,
     publicPath: ASSET_PATH,
@@ -89,24 +84,12 @@ var options = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(ts|tsx)$/,
+        test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "url-loader",
         exclude: /node_modules/,
-        use: [
-          {
-            loader: require.resolve("ts-loader"),
-            options: {
-              getCustomTransformers: () => ({
-                before: [isDevelopment && ReactRefreshTypeScript()].filter(
-                  Boolean
-                ),
-              }),
-              transpileOnly: isDevelopment,
-            },
-          },
-        ],
       },
       {
-        test: /\.(js|jsx)$/,
+        test: /\.[jt]sx?$/,
         use: [
           {
             loader: "source-map-loader",
@@ -117,6 +100,11 @@ var options = {
               plugins: [
                 isDevelopment && require.resolve("react-refresh/babel"),
               ].filter(Boolean),
+              presets: [
+                "@babel/preset-env",
+                "@babel/preset-react",
+                "@babel/preset-typescript",
+              ],
             },
           },
         ],
@@ -128,7 +116,7 @@ var options = {
     alias: alias,
     extensions: fileExtensions
       .map((extension) => "." + extension)
-      .concat([".js", ".jsx", ".ts", ".tsx", ".css"]),
+      .concat([".js", ".jsx", ".ts", ".tsx", ".scss", ".css"]),
   },
   plugins: [
     isDevelopment && new ReactRefreshWebpackPlugin(),
@@ -158,7 +146,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: "src/pages/Content/content.styles.css",
+          from: "src/public/icon-128.png",
           to: path.join(__dirname, "build"),
           force: true,
         },
@@ -167,7 +155,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: "src/assets/img/icon-128.png",
+          from: "src/public/icon-34.png",
           to: path.join(__dirname, "build"),
           force: true,
         },
@@ -176,7 +164,52 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: "src/assets/img/icon-34.png",
+          from: "src/styles/index.module.scss",
+          to: path.join(__dirname, "build"),
+          force: true,
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "src/styles/globals.scss",
+          to: path.join(__dirname, "build"),
+          force: true,
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "src/styles/cmdk/framer.scss",
+          to: path.join(__dirname, "build"),
+          force: true,
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "src/styles/cmdk/raycast.scss",
+          to: path.join(__dirname, "build"),
+          force: true,
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "src/styles/cmdk/linear.scss",
+          to: path.join(__dirname, "build"),
+          force: true,
+        },
+      ],
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: "src/styles/cmdk/vercel.scss",
           to: path.join(__dirname, "build"),
           force: true,
         },
@@ -189,15 +222,15 @@ var options = {
       cache: false,
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "pages", "Devtools", "index.html"),
-      filename: "devtools.html",
-      chunks: ["devtools"],
+      template: path.join(__dirname, "src", "pages", "Popup", "index.html"),
+      filename: "popup.html",
+      chunks: ["popup"],
       cache: false,
     }),
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, "src", "pages", "Panel", "index.html"),
-      filename: "panel.html",
-      chunks: ["panel"],
+      template: path.join(__dirname, "src", "pages", "Content", "index.tsx"),
+      filename: "content.html",
+      chunks: ["content"],
       cache: false,
     }),
   ].filter(Boolean),
