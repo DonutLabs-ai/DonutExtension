@@ -395,5 +395,5 @@ if (container) {
   const root = createRoot(container);
   root.render(<Index />);
 } else {
-  console.log("no container");
+  console.error("no container");
 }

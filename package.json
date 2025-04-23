@@ -1,6 +1,7 @@
 {
   "name": "donut-extension",
   "version": "1.0.0",
+  "author": "Donut Labs",
   "description": "Donut Command Bar Extension",
   "private": true,
   "scripts": {
