@@ -17,12 +17,12 @@ type TTheme = {
   setTheme: Function;
 };
 
-type Themes = "vercel";
+type Themes = "donut";
 
 const ThemeContext = React.createContext<TTheme>({} as TTheme);
 
 export default function Index() {
-  const [theme, setTheme] = useState<Themes>("vercel");
+  const [theme, setTheme] = useState<Themes>("donut");
 
   return (
     <main className={styles.main}>
@@ -41,7 +41,7 @@ export default function Index() {
         </div>
 
         <AnimatePresence exitBeforeEnter initial={false}>
-          {theme === "vercel" && (
+          {theme === "donut" && (
             <CMDKWrapper key="donut">
               <VercelCMDK />
             </CMDKWrapper>
