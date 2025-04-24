@@ -1,20 +1,15 @@
 import * as styles from "../../styles/index.module.scss";
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AnimatePresence, motion, MotionProps, useInView } from "framer-motion";
+import { AnimatePresence, motion, MotionProps } from "framer-motion";
 
 import {
-  FramerCMDK,
-  LinearCMDK,
-  LinearIcon,
   VercelCMDK,
   VercelIcon,
   RaycastCMDK,
   RaycastIcon,
   CopyIcon,
-  FramerIcon,
   GitHubIcon,
-  Code,
   CopiedIcon,
 } from "../../components";
 import packageJSON from "../../../package.json";
@@ -24,12 +19,12 @@ type TTheme = {
   setTheme: Function;
 };
 
-type Themes = "linear" | "raycast" | "vercel" | "framer";
+type Themes = "raycast" | "vercel";
 
 const ThemeContext = React.createContext<TTheme>({} as TTheme);
 
 export default function Index() {
-  const [theme, setTheme] = useState<Themes>("raycast");
+  const [theme, setTheme] = useState<Themes>("vercel");
 
   return (
     <main className={styles.main}>
@@ -48,19 +43,9 @@ export default function Index() {
         </div>
 
         <AnimatePresence exitBeforeEnter initial={false}>
-          {theme === "framer" && (
-            <CMDKWrapper key="framer">
-              <FramerCMDK />
-            </CMDKWrapper>
-          )}
           {theme === "vercel" && (
             <CMDKWrapper key="vercel">
               <VercelCMDK />
-            </CMDKWrapper>
-          )}
-          {theme === "linear" && (
-            <CMDKWrapper key="linear">
-              <LinearCMDK />
             </CMDKWrapper>
           )}
           {theme === "raycast" && (
@@ -75,8 +60,6 @@ export default function Index() {
         </ThemeContext.Provider>
 
         <div aria-hidden className={styles.line} />
-
-        <Codeblock />
       </div>
     </main>
   );
@@ -143,16 +126,8 @@ const themes = [
     key: "raycast",
   },
   {
-    icon: <LinearIcon />,
-    key: "linear",
-  },
-  {
     icon: <VercelIcon />,
     key: "vercel",
-  },
-  {
-    icon: <FramerIcon />,
-    key: "framer",
   },
 ];
 
@@ -256,41 +231,6 @@ function ThemeSwitcher() {
     </div>
   );
 }
-//////////////////////////////////////////////////////////////////
-
-function Codeblock() {
-  const code = `import { Command } from 'cmdk';
-
-<Command.Dialog open={open} onOpenChange={setOpen}>
-  <Command.Input />
-
-  <Command.List>
-    {loading && <Command.Loading>Hang on…</Command.Loading>}
-
-    <Command.Empty>No results found.</Command.Empty>
-
-    <Command.Group heading="Fruits">
-      <Command.Item>Apple</Command.Item>
-      <Command.Item>Orange</Command.Item>
-      <Command.Separator />
-      <Command.Item>Pear</Command.Item>
-      <Command.Item>Blueberry</Command.Item>
-    </Command.Group>
-
-    <Command.Item>Fish</Command.Item>
-  </Command.List>
-</Command.Dialog>`;
-
-  return (
-    <div className={styles.codeBlock}>
-      <div className={styles.line2} aria-hidden />
-      <div className={styles.line3} aria-hidden />
-      <Code>{code}</Code>
-    </div>
-  );
-}
-
-//////////////////////////////////////////////////////////////////
 
 function VersionBadge() {
   return <span className={styles.versionBadge}>v{packageJSON.version}</span>;

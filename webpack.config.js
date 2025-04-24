@@ -181,25 +181,7 @@ var options = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: "src/styles/cmdk/framer.scss",
-          to: path.join(__dirname, "build"),
-          force: true,
-        },
-      ],
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
           from: "src/styles/cmdk/raycast.scss",
-          to: path.join(__dirname, "build"),
-          force: true,
-        },
-      ],
-    }),
-    new CopyWebpackPlugin({
-      patterns: [
-        {
-          from: "src/styles/cmdk/linear.scss",
           to: path.join(__dirname, "build"),
           force: true,
         },
