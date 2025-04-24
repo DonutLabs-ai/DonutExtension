@@ -42,7 +42,7 @@ export default function Index() {
 
         <AnimatePresence exitBeforeEnter initial={false}>
           {theme === "vercel" && (
-            <CMDKWrapper key="vercel">
+            <CMDKWrapper key="donut">
               <VercelCMDK />
             </CMDKWrapper>
           )}
@@ -116,7 +116,7 @@ function GitHubButton() {
 const themes = [
   {
     icon: <VercelIcon />,
-    key: "vercel",
+    key: "donut",
   },
 ];
 
