@@ -21,21 +21,9 @@ chrome.commands.onCommand.addListener((command) => {
     getCurrentTab().then((response) => {
       const respId = response.id;
       if (respId) {
-        if (
-          !response.url?.includes("chrome://") &&
-          !response.url?.includes("chrome.google.com")
-        ) {
-          chrome.tabs.sendMessage(respId, { request: "open-donut" });
-        } else {
-          chrome.tabs
-            .create({
-              url: "./popup.html",
-            })
-            .then(() => {
-              newtaburl = respId.toString();
-              chrome.tabs.remove(respId);
-            });
-        }
+        chrome.tabs.create({
+          url: "./popup.html",
+        });
       }
     });
   }

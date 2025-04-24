@@ -13,10 +13,12 @@ if (typeof chrome !== "undefined") {
       if (isOpen) {
         console.log("already open");
       } else {
-        console.log("open donut");
+        chrome.runtime.sendMessage({ request: "open-donut" });
+        isOpen = true;
       }
     } else if (message.request == "close-donut") {
       console.log("close donut");
+      isOpen = false;
     }
   });
 } else {
