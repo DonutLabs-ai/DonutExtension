@@ -6,8 +6,6 @@ import { AnimatePresence, motion, MotionProps } from "framer-motion";
 import {
   VercelCMDK,
   VercelIcon,
-  RaycastCMDK,
-  RaycastIcon,
   CopyIcon,
   GitHubIcon,
   CopiedIcon,
@@ -19,7 +17,7 @@ type TTheme = {
   setTheme: Function;
 };
 
-type Themes = "raycast" | "vercel";
+type Themes = "vercel";
 
 const ThemeContext = React.createContext<TTheme>({} as TTheme);
 
@@ -46,11 +44,6 @@ export default function Index() {
           {theme === "vercel" && (
             <CMDKWrapper key="vercel">
               <VercelCMDK />
-            </CMDKWrapper>
-          )}
-          {theme === "raycast" && (
-            <CMDKWrapper key="raycast">
-              <RaycastCMDK />
             </CMDKWrapper>
           )}
         </AnimatePresence>
@@ -121,10 +114,6 @@ function GitHubButton() {
 //////////////////////////////////////////////////////////////////
 
 const themes = [
-  {
-    icon: <RaycastIcon />,
-    key: "raycast",
-  },
   {
     icon: <VercelIcon />,
     key: "vercel",
