@@ -39,8 +39,12 @@ var options = {
   entry: {
     popup: path.join(__dirname, "src", "pages", "Popup", "index.tsx"),
     options: path.join(__dirname, "src", "pages", "Options", "index.html"),
+    background: path.join(__dirname, "src", "pages", "Background", "index.ts"),
+    contentScript: path.join(__dirname, "src", "pages", "Content", "index.ts"),
   },
-  chromeExtensionBoilerplate: {},
+  chromeExtensionBoilerplate: {
+    notHotReload: ["background", "contentScript"],
+  },
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "build"),
@@ -133,7 +137,6 @@ var options = {
             // generates the manifest file using the package.json informations
             return Buffer.from(
               JSON.stringify({
-                description: process.env.npm_package_description,
                 version: process.env.npm_package_version,
                 ...JSON.parse(content.toString()),
               })

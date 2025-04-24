@@ -1,0 +1,45 @@
+[
+  {
+    "symbol": "WETH",
+    "name": "WETH",
+    "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "decimals": 18,
+    "chainId": 1,
+    "logoURI": "https://tokens.1inch.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+    "coingeckoId": "weth",
+    "listedIn": [
+      "coingecko",
+      "1inch",
+      "uniswap",
+      "sushiswap",
+      "openocean",
+      "arbitrum_bridge",
+      "rubic",
+      "lifinance",
+      "xyfinance",
+      "elkfinance"
+    ]
+  },
+  {
+    "symbol": "USDC",
+    "name": "USD Coin",
+    "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "decimals": 6,
+    "chainId": 1,
+    "logoURI": "https://tokens.1inch.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+    "coingeckoId": "usd-coin",
+    "listedIn": [
+      "coingecko",
+      "1inch",
+      "uniswap",
+      "sushiswap",
+      "openocean",
+      "optimism",
+      "arbitrum_bridge",
+      "rubic",
+      "lifinance",
+      "xyfinance",
+      "elkfinance"
+    ]
+  }
+]

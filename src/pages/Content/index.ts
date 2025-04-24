@@ -1,0 +1,26 @@
+declare const donut: any;
+
+console.log("Content script works!");
+console.log("Must reload extension for modifications to take effect.");
+
+if (typeof chrome !== "undefined") {
+  let actions = [];
+  let isOpen = false;
+
+  // Recieve messages from background
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.request == "open-donut") {
+      if (isOpen) {
+        console.log("already open");
+      } else {
+        console.log("open donut");
+      }
+    } else if (message.request == "close-donut") {
+      console.log("close donut");
+    }
+  });
+} else {
+  console.error("not chromium");
+}
+
+export {};
