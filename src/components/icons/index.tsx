@@ -1,5 +1,4 @@
 import React from "react";
-import * as styles from "./icons.module.scss";
 
 export function DonutIcon() {
   return (
@@ -96,29 +95,6 @@ export function DonutIcon() {
       c0-0.078,0.016-0.141,0.031-0.219l0,0C213.728,94.497,212.743,90.998,210.212,88.451z"
       />
     </svg>
-  );
-}
-
-export function Logo({
-  children,
-  size = "20px",
-}: {
-  children: React.ReactNode;
-  size?: string;
-}) {
-  return (
-    <div
-      className={styles.blurLogo}
-      style={{
-        width: size,
-        height: size,
-      }}
-    >
-      <div className={styles.bg} aria-hidden>
-        {children}
-      </div>
-      <div className={styles.inner}>{children}</div>
-    </div>
   );
 }
 
