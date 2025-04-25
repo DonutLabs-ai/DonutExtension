@@ -4,14 +4,14 @@ import { createRoot } from "react-dom/client";
 import { AnimatePresence, motion, MotionProps } from "framer-motion";
 
 import {
-  VercelCMDK,
-  VercelIcon,
+  DonutCMDK,
+  DonutIcon,
   RedCircleIcon,
   GitHubIcon,
   GreenCircleIcon,
 } from "../../components";
 import packageJSON from "../../../package.json";
-import { connect } from "./swap";
+import { connect } from "../../lib/swap";
 
 type TTheme = {
   theme: Themes;
@@ -44,7 +44,7 @@ export default function Index() {
         <AnimatePresence exitBeforeEnter initial={false}>
           {theme === "donut" && (
             <CMDKWrapper key="donut">
-              <VercelCMDK />
+              <DonutCMDK />
             </CMDKWrapper>
           )}
         </AnimatePresence>
@@ -113,7 +113,7 @@ function GitHubButton() {
 
 const themes = [
   {
-    icon: <VercelIcon />,
+    icon: <DonutIcon />,
     key: "donut",
   },
 ];

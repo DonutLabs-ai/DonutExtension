@@ -1,2 +1,2 @@
-export * from "./cmdk/vercel";
+export * from "./cmdk/donut";
 export * from "./icons";
