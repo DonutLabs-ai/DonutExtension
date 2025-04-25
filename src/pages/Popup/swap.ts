@@ -22,7 +22,7 @@ async function listAvailableTokens(): Promise<any> {
   return tokens;
 }
 
-async function connect(): bool {
+async function connect(): Promise<boolean> {
   if (typeof window.ethereum !== "undefined") {
     try {
       console.log("connecting");
