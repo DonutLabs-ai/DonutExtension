@@ -254,47 +254,44 @@ export function Logo({
   );
 }
 
-export function CopyIcon() {
+export function RedCircleIcon() {
   return (
-    <svg
-      width="16"
-      height="16"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-      fill="none"
-    >
-      <path
-        d="M19.4 20H9.6C9.26863 20 9 19.7314 9 19.4V9.6C9 9.26863 9.26863 9 9.6 9H19.4C19.7314 9 20 9.26863 20 9.6V19.4C20 19.7314 19.7314 20 19.4 20Z"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M15 9V4.6C15 4.26863 14.7314 4 14.4 4H4.6C4.26863 4 4 4.26863 4 4.6V14.4C4 14.7314 4.26863 15 4.6 15H9"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="16" height="16" viewBox="24 24 24 24" fill="none">
+      <g id="color">
+        <circle cx="36" cy="36.0001" r="8" fill="#d22f27" />
+      </g>
+      <g id="line">
+        <circle
+          cx="36"
+          cy="36.0001"
+          r="8"
+          fill="none"
+          stroke="#000000"
+          stroke-linejoin="round"
+          stroke-width="2"
+        />
+      </g>
     </svg>
   );
 }
 
-export function CopiedIcon() {
+export function GreenCircleIcon() {
   return (
-    <svg
-      width="16"
-      height="16"
-      strokeWidth="1.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M5 13L9 17L19 7"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg width="16" height="16" viewBox="24 24 24 24" fill="none">
+      <g id="color">
+        <circle cx="36" cy="36.0001" r="8" fill="#008000" />
+      </g>
+      <g id="line">
+        <circle
+          cx="36"
+          cy="36.0001"
+          r="8"
+          fill="none"
+          stroke="#000000"
+          stroke-linejoin="round"
+          stroke-width="2"
+        />
+      </g>
     </svg>
   );
 }

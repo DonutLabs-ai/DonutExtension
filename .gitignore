@@ -2,3 +2,6 @@ build
 node_modules
 zip
 .env
+
+# secrets
+**/*secrets*.ts

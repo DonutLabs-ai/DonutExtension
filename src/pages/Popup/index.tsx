@@ -6,11 +6,12 @@ import { AnimatePresence, motion, MotionProps } from "framer-motion";
 import {
   VercelCMDK,
   VercelIcon,
-  CopyIcon,
+  RedCircleIcon,
   GitHubIcon,
-  CopiedIcon,
+  GreenCircleIcon,
 } from "../../components";
 import packageJSON from "../../../package.json";
+import { connect } from "./swap";
 
 type TTheme = {
   theme: Themes;
@@ -76,23 +77,20 @@ function CMDKWrapper(props: MotionProps & { children: React.ReactNode }) {
 //////////////////////////////////////////////////////////////////
 
 function InstallButton() {
-  const [copied, setCopied] = useState(false);
+  const [copied, setStatus] = useState(false);
 
   return (
     <button
       className={styles.installButton}
       onClick={async () => {
         try {
-          await navigator.clipboard.writeText(`donut 🍩`);
-          setCopied(true);
-          setTimeout(() => {
-            setCopied(false);
-          }, 2000);
+          let res = await connect();
+          setStatus(res);
         } catch (e) {}
       }}
     >
-      donut 🍩
-      <span>{copied ? <CopiedIcon /> : <CopyIcon />}</span>
+      connect wallet to donut 🍩
+      <span>{copied ? <GreenCircleIcon /> : <RedCircleIcon />}</span>
     </button>
   );
 }
