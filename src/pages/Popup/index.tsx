@@ -1,11 +1,10 @@
 import * as styles from "../../styles/index.module.scss";
 import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { AnimatePresence, motion, MotionProps } from "framer-motion";
+import { motion, MotionProps } from "framer-motion";
 
 import {
   DonutCMDK,
-  DonutIcon,
   tokenRecord,
   RedCircleIcon,
   GitHubIcon,
@@ -13,15 +12,6 @@ import {
 } from "../../components";
 import packageJSON from "../../../package.json";
 import { connect } from "../../lib/swap";
-
-type TTheme = {
-  theme: Themes;
-  setTheme: Function;
-};
-
-type Themes = "donut";
-
-const ThemeContext = React.createContext<TTheme>({} as TTheme);
 
 export default function Index() {
   return (
@@ -95,116 +85,6 @@ function GitHubButton() {
       <GitHubIcon />
       Donut Extension
     </a>
-  );
-}
-
-//////////////////////////////////////////////////////////////////
-
-const themes = [
-  {
-    icon: <DonutIcon />,
-    key: "donut",
-  },
-];
-
-function ThemeSwitcher() {
-  const { theme, setTheme } = React.useContext(ThemeContext);
-  const ref = React.useRef<HTMLButtonElement | null>(null);
-  const [showArrowKeyHint, setShowArrowKeyHint] = useState(false);
-
-  React.useEffect(() => {
-    function listener(e: KeyboardEvent) {
-      const themeNames = themes.map((t) => t.key);
-
-      if (e.key === "ArrowRight") {
-        const currentIndex = themeNames.indexOf(theme);
-        const nextIndex = currentIndex + 1;
-        const nextItem = themeNames[nextIndex];
-
-        if (nextItem) {
-          setTheme(nextItem);
-        }
-      }
-
-      if (e.key === "ArrowLeft") {
-        const currentIndex = themeNames.indexOf(theme);
-        const prevIndex = currentIndex - 1;
-        const prevItem = themeNames[prevIndex];
-
-        if (prevItem) {
-          setTheme(prevItem);
-        }
-      }
-    }
-
-    document.addEventListener("keydown", listener);
-
-    return () => {
-      document.removeEventListener("keydown", listener);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [theme]);
-
-  return (
-    <div className={styles.switcher}>
-      <motion.span
-        className={styles.arrow}
-        initial={false}
-        animate={{
-          opacity: showArrowKeyHint ? 1 : 0,
-          x: showArrowKeyHint ? -24 : 0,
-        }}
-        style={{
-          left: 100,
-        }}
-      >
-        ←
-      </motion.span>
-      {themes.map(({ key, icon }) => {
-        const isActive = theme === key;
-        return (
-          <button
-            ref={ref}
-            key={key}
-            data-selected={isActive}
-            onClick={() => {
-              setTheme(key);
-              if (showArrowKeyHint === false) {
-                setShowArrowKeyHint(true);
-              }
-            }}
-          >
-            {icon}
-            {key}
-            {isActive && (
-              <motion.div
-                layoutId="activeTheme"
-                transition={{
-                  type: "spring",
-                  stiffness: 250,
-                  damping: 27,
-                  mass: 1,
-                }}
-                className={styles.activeTheme}
-              />
-            )}
-          </button>
-        );
-      })}
-      <motion.span
-        className={styles.arrow}
-        initial={false}
-        animate={{
-          opacity: showArrowKeyHint ? 1 : 0,
-          x: showArrowKeyHint ? 20 : 0,
-        }}
-        style={{
-          right: 100,
-        }}
-      >
-        →
-      </motion.span>
-    </div>
   );
 }
 

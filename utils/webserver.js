@@ -39,10 +39,16 @@ var server = new WebpackDevServer(
     static: {
       directory: path.join(__dirname, "../build"),
     },
-    devMiddleware: {
-      publicPath: `http://localhost:${env.PORT}/`,
-      writeToDisk: true,
-    },
+    proxy: [
+      {
+        context: ["/api"],
+        target: "https://api.0x.org",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/api": "",
+        },
+      },
+    ],
     headers: {
       "Access-Control-Allow-Origin": "*",
     },

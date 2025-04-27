@@ -8,34 +8,45 @@ export async function doAction(
   input: string[],
   tokenList: Record<string, Token>
 ) {
-  console.log("trade");
   console.log(input);
   switch (input.at(0)) {
     case "SWAP": {
-      const amount = input.at(1);
+      const amount = input.at(1) ?? "no number";
       const sellTokenTicker = input.at(2);
       const buyTokenTicker = input.at(3);
-      if (!amount) {
-        return "second input is not a number";
-      }
 
       const numberAmount = parseInt(amount, 10);
 
+      if (!numberAmount) {
+        return "invalid amount to buy";
+      }
+
       if (sellTokenTicker) {
+        console.log(sellTokenTicker);
         const sellToken = tokenList[sellTokenTicker];
+        console.log(sellToken);
+        console.log(tokenList);
+
         if (buyTokenTicker) {
           const buyToken = tokenList[buyTokenTicker];
-          const stringReciept = await trySwap(
-            sellToken,
-            buyToken,
-            numberAmount
-          );
-          return stringReciept.toString();
+          if (sellToken && buyToken) {
+            const scaledAmount = numberAmount * 10 ** sellToken.decimals;
+            console.log(scaledAmount);
+
+            const stringReciept = await trySwap(
+              sellToken,
+              buyToken,
+              scaledAmount
+            );
+            return stringReciept.toString();
+          } else {
+            return "token unsupported";
+          }
         } else {
-          return "buy token ticker is not supported";
+          return "enter buy token";
         }
       } else {
-        return "sell token ticker is not supported";
+        return "enter sell token";
       }
     }
     default:
@@ -43,7 +54,7 @@ export async function doAction(
   }
 }
 
-export function DonutCMDK(tokenList: Record<string, Token>) {
+export function DonutCMDK(tokenList: { tokenList: Record<string, Token> }) {
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [inputValue, setInputValue] = React.useState("");
   const [actionValue, actionResult] = React.useState("");
@@ -68,7 +79,7 @@ export function DonutCMDK(tokenList: Record<string, Token>) {
             bounce();
             const res = await doAction(
               inputValue.toUpperCase().split(" "),
-              tokenList
+              tokenList.tokenList
             );
             actionResult(res);
           }

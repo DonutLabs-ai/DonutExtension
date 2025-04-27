@@ -1,10 +1,9 @@
 // put api key in this file not commited
 import { oxApiKey } from "./secrets-swap-key";
-import { Eip1193Provider, MaxInt256 } from "ethers";
+import { Eip1193Provider, MaxInt256, BrowserProvider, Contract } from "ethers";
 import tokensJSON from "../public/supported-tokens.json";
 
 import qs from "qs";
-import Web3, { TransactionReceipt } from "web3";
 
 declare global {
   interface Window {
@@ -29,7 +28,6 @@ function parseTokens(tokens: any): Record<string, Token> {
       address: token.address,
       decimals: token.decimals,
     };
-
     tokensRecord[token.symbol] = tokenInfo;
   }
 
@@ -37,12 +35,9 @@ function parseTokens(tokens: any): Record<string, Token> {
 }
 
 async function listAvailableTokens(): Promise<any> {
-  console.log("initializing");
   let response = await fetch("https://tokens.coingecko.com/uniswap/all.json");
   let tokenListJSON = await response.json();
-  console.log("listing available tokens: ", tokenListJSON);
   const tokens = tokenListJSON.tokens;
-  console.log("tokens: ", tokens);
 
   return tokens;
 }
@@ -63,66 +58,49 @@ async function connect(): Promise<boolean> {
   }
 }
 
-async function getPrice(
-  sellToken: any,
-  buyToken: any,
-  sellAmount: number,
-  decimals: number
-): Promise<any> {
-  const params = {
-    sellToken,
-    buyToken,
-    sellAmount,
-  };
-
-  const headers = { "0x-api-key": oxApiKey };
-
-  // Fetch the swap price.
-  const response = await fetch(
-    `https://api.0x.org/swap/v1/price?${qs.stringify(params)}`,
-    { headers }
-  );
-
-  const swapPriceJSON = await response.json();
-  console.log("Price: ", swapPriceJSON);
-
-  return swapPriceJSON.buyAmount / 10 ** decimals;
-}
-
 async function getQuote(
   sellToken: Token,
   buyToken: Token,
   sellAmount: number,
-  takerAddress: string
+  takerAddress: string,
+  chainId: number
 ) {
   console.log("Getting Quote");
 
   const params = {
+    chainId: chainId,
     sellToken: sellToken.address,
     buyToken: buyToken.address,
     sellAmount,
-    takerAddress,
+    taker: takerAddress,
   };
 
-  const headers = { "0x-api-key": oxApiKey }; // This is a placeholder. Get your live API key from the 0x Dashboard (https://dashboard.0x.org/apps)
+  try {
+    const headers = new Headers();
+    headers.set("0x-api-key", oxApiKey);
+    headers.set("0x-version", "v2");
+    headers.set("User-Agent", "curl/7.81.0");
 
-  // Fetch the swap quote.
-  const response = await fetch(
-    `https://api.0x.org/swap/v1/quote?${qs.stringify(params)}`,
-    { headers }
-  );
+    // Fetch the swap quote.
+    const response = await fetch(
+      `api/swap/permit2/quote?${qs.stringify(params)}`,
+      { headers }
+    );
+    console.log(response);
 
-  const swapQuoteJSON = await response.json();
-  console.log("Quote: ", swapQuoteJSON);
-
-  return swapQuoteJSON;
+    const swapQuoteJSON = await response.json();
+    console.log("Quote: ", swapQuoteJSON);
+    return swapQuoteJSON;
+  } catch {
+    return { message: "You cannot consume this service" };
+  }
 }
 
 async function trySwap(
   sellToken: Token,
   buyToken: Token,
   sellAmount: number
-): Promise<TransactionReceipt> {
+): Promise<string> {
   const erc20abi = [
     {
       inputs: [
@@ -296,7 +274,12 @@ async function trySwap(
 
   // Only work if MetaMask is connect
   // Connecting to Ethereum: Metamask
-  const web3 = new Web3(Web3.givenProvider);
+  if (!window.ethereum) {
+    return "no wallet connected";
+  }
+  // hardcode chainId to 1 for now
+  const chainId = 1;
+  const provider = new BrowserProvider(window.ethereum, chainId);
 
   // The address, if any, of the most recently used account that the caller is permitted to access
   let accounts = await window.ethereum?.request({ method: "eth_accounts" });
@@ -311,29 +294,43 @@ async function trySwap(
     sellToken,
     buyToken,
     sellAmount,
-    takerAddress
+    takerAddress,
+    chainId
   );
+
+  if (swapQuoteJSON.message === "You cannot consume this service") {
+    return "get quote api call failed";
+  } else if (swapQuoteJSON.message === "no Route matched with those values") {
+    return "no swap path mathcing those tokens";
+  }
 
   // Set Token Allowance
   // Set up approval amount
   const maxApproval = MaxInt256;
   console.log("approval amount: ", maxApproval);
-  const ERC20TokenContract = new web3.eth.Contract(erc20abi, sellToken.address);
+  const ERC20TokenContract = new Contract(
+    sellToken.address,
+    erc20abi,
+    provider
+  );
   console.log("setup ERC20TokenContract: ", ERC20TokenContract);
 
-  // Grant the allowance target an allowance to spend our tokens.
-  const tx = await ERC20TokenContract.methods
-    .approve(swapQuoteJSON.allowanceTarget, maxApproval)
-    .send({ from: takerAddress })
-    .then((tx) => {
-      console.log("tx: ", tx);
+  try {
+    // Grant the allowance target an allowance to spend our tokens.
+    const tx = await ERC20TokenContract.approve(sellToken, maxApproval, {
+      gasPrice: 10000,
+      gasLimit: 1000000,
     });
 
-  // Perform the swap
-  const receipt = await web3.eth.sendTransaction(swapQuoteJSON);
-  console.log("receipt: ", receipt);
+    console.log(tx);
 
-  return receipt;
+    // Perform the swap
+    const receipt = "bla"; //await web3.eth.sendTransaction(swapQuoteJSON);
+    console.log("receipt: ", receipt);
+    return receipt.toString();
+  } catch {
+    return "failed to construct tx";
+  }
 }
 
 export { trySwap, connect, listAvailableTokens };
