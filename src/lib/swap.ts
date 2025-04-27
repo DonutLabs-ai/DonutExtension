@@ -280,6 +280,7 @@ async function trySwap(
   // hardcode chainId to 1 for now
   const chainId = 1;
   const provider = new BrowserProvider(window.ethereum, chainId);
+  const signer = await provider.getSigner();
 
   // The address, if any, of the most recently used account that the caller is permitted to access
   let accounts = await window.ethereum?.request({ method: "eth_accounts" });
@@ -308,28 +309,36 @@ async function trySwap(
   // Set up approval amount
   const maxApproval = MaxInt256;
   console.log("approval amount: ", maxApproval);
-  const ERC20TokenContract = new Contract(
-    sellToken.address,
-    erc20abi,
-    provider
-  );
+  const ERC20TokenContract = new Contract(sellToken.address, erc20abi, signer);
   console.log("setup ERC20TokenContract: ", ERC20TokenContract);
 
   try {
+    const permit2Address = swapQuoteJSON.issues.allowance.spender;
+    const swapTx = swapQuoteJSON.transaction;
+
     // Grant the allowance target an allowance to spend our tokens.
-    const tx = await ERC20TokenContract.approve(sellToken, maxApproval, {
-      gasPrice: 10000,
-      gasLimit: 1000000,
-    });
+    try {
+      const approveTx = await ERC20TokenContract.approve(
+        permit2Address,
+        maxApproval
+      );
 
-    console.log(tx);
+      console.log(approveTx);
+    } catch (e) {
+      console.log(`approval tx failed: ${e}`);
+    }
 
-    // Perform the swap
-    const receipt = "bla"; //await web3.eth.sendTransaction(swapQuoteJSON);
-    console.log("receipt: ", receipt);
-    return receipt.toString();
-  } catch {
-    return "failed to construct tx";
+    try {
+      // Perform the swap
+      const receipt = await signer.sendTransaction(swapTx);
+      return receipt.toString();
+    } catch (e) {
+      console.log(`swap tx failed: ${e}`);
+      return "swap failed, likely lack of funds";
+    }
+  } catch (e) {
+    console.log(e);
+    return "transaction failed or was canceled";
   }
 }
 
