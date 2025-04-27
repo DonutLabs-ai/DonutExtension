@@ -6,6 +6,7 @@ import { AnimatePresence, motion, MotionProps } from "framer-motion";
 import {
   DonutCMDK,
   DonutIcon,
+  tokenRecord,
   RedCircleIcon,
   GitHubIcon,
   GreenCircleIcon,
@@ -23,8 +24,6 @@ type Themes = "donut";
 const ThemeContext = React.createContext<TTheme>({} as TTheme);
 
 export default function Index() {
-  const [theme, setTheme] = useState<Themes>("donut");
-
   return (
     <main className={styles.main}>
       <div className={styles.content}>
@@ -40,19 +39,9 @@ export default function Index() {
             <GitHubButton />
           </div>
         </div>
-
-        <AnimatePresence exitBeforeEnter initial={false}>
-          {theme === "donut" && (
-            <CMDKWrapper key="donut">
-              <DonutCMDK />
-            </CMDKWrapper>
-          )}
-        </AnimatePresence>
-
-        <ThemeContext.Provider value={{ theme, setTheme }}>
-          <ThemeSwitcher />
-        </ThemeContext.Provider>
-
+        <CMDKWrapper key="donut">
+          <DonutCMDK tokenList={tokenRecord} />
+        </CMDKWrapper>
         <div aria-hidden className={styles.line} />
       </div>
     </main>

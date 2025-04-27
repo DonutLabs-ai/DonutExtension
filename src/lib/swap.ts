@@ -1,14 +1,39 @@
 // put api key in this file not commited
 import { oxApiKey } from "./secrets-swap-key";
 import { Eip1193Provider, MaxInt256 } from "ethers";
+import tokensJSON from "../public/supported-tokens.json";
 
 import qs from "qs";
-import Web3 from "web3";
+import Web3, { TransactionReceipt } from "web3";
 
 declare global {
   interface Window {
     ethereum?: Eip1193Provider;
   }
+}
+
+export interface Token {
+  address: string;
+  decimals: number;
+}
+
+export function supportedTokens(): Record<string, Token> {
+  return parseTokens(tokensJSON);
+}
+
+function parseTokens(tokens: any): Record<string, Token> {
+  let tokensRecord: Record<string, Token> = {};
+
+  for (const token of tokens.tokens) {
+    const tokenInfo: Token = {
+      address: token.address,
+      decimals: token.decimals,
+    };
+
+    tokensRecord[token.symbol] = tokenInfo;
+  }
+
+  return tokensRecord;
 }
 
 async function listAvailableTokens(): Promise<any> {
@@ -65,16 +90,16 @@ async function getPrice(
 }
 
 async function getQuote(
-  sellToken: any,
-  buyToken: any,
+  sellToken: Token,
+  buyToken: Token,
   sellAmount: number,
-  takerAddress: any
+  takerAddress: string
 ) {
   console.log("Getting Quote");
 
   const params = {
-    sellToken,
-    buyToken,
+    sellToken: sellToken.address,
+    buyToken: buyToken.address,
     sellAmount,
     takerAddress,
   };
@@ -93,7 +118,11 @@ async function getQuote(
   return swapQuoteJSON;
 }
 
-async function trySwap(sellToken: any, buyToken: any, sellAmount: number) {
+async function trySwap(
+  sellToken: Token,
+  buyToken: Token,
+  sellAmount: number
+): Promise<TransactionReceipt> {
   const erc20abi = [
     {
       inputs: [
@@ -274,6 +303,10 @@ async function trySwap(sellToken: any, buyToken: any, sellAmount: number) {
   let takerAddress = accounts[0];
   console.log("takerAddress: ", takerAddress);
 
+  console.log(`sell token: ${sellToken}`);
+  console.log(`buy token: ${buyToken}`);
+  console.log(`buy number ${sellAmount}`);
+
   const swapQuoteJSON = await getQuote(
     sellToken,
     buyToken,
@@ -285,7 +318,7 @@ async function trySwap(sellToken: any, buyToken: any, sellAmount: number) {
   // Set up approval amount
   const maxApproval = MaxInt256;
   console.log("approval amount: ", maxApproval);
-  const ERC20TokenContract = new web3.eth.Contract(erc20abi, sellToken);
+  const ERC20TokenContract = new web3.eth.Contract(erc20abi, sellToken.address);
   console.log("setup ERC20TokenContract: ", ERC20TokenContract);
 
   // Grant the allowance target an allowance to spend our tokens.
@@ -299,6 +332,8 @@ async function trySwap(sellToken: any, buyToken: any, sellAmount: number) {
   // Perform the swap
   const receipt = await web3.eth.sendTransaction(swapQuoteJSON);
   console.log("receipt: ", receipt);
+
+  return receipt;
 }
 
 export { trySwap, connect, listAvailableTokens };
