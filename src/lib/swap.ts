@@ -330,8 +330,7 @@ async function trySwap(
         permit2Address,
         maxApproval
       );
-
-      console.log(approveTx);
+      console.log("tx approved: ", approveTx);
     } catch (e) {
       console.log(`approval tx failed: ${e}`);
     }
