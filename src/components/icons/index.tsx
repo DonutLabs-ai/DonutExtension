@@ -111,8 +111,8 @@ export function RedCircleIcon() {
           r="8"
           fill="none"
           stroke="#000000"
-          stroke-linejoin="round"
-          stroke-width="2"
+          strokeLinejoin="round"
+          strokeWidth="2"
         />
       </g>
     </svg>
@@ -132,8 +132,8 @@ export function GreenCircleIcon() {
           r="8"
           fill="none"
           stroke="#000000"
-          stroke-linejoin="round"
-          stroke-width="2"
+          strokeLinejoin="round"
+          strokeWidth="2"
         />
       </g>
     </svg>

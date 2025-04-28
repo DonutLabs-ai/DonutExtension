@@ -1,6 +1,14 @@
 // put api key in this file not commited
 import { oxApiKey } from "./secrets-swap-key";
-import { Eip1193Provider, MaxInt256, BrowserProvider, Contract } from "ethers";
+import {
+  Eip1193Provider,
+  MaxInt256,
+  BrowserProvider,
+  Contract,
+  TypedDataField,
+  toBeHex,
+  concat,
+} from "ethers";
 import tokensJSON from "../public/supported-tokens.json";
 
 import qs from "qs";
@@ -313,11 +321,11 @@ async function trySwap(
   console.log("setup ERC20TokenContract: ", ERC20TokenContract);
 
   try {
-    const permit2Address = swapQuoteJSON.issues.allowance.spender;
-    const swapTx = swapQuoteJSON.transaction;
+    // Below logic not needed fo now as api includes this call in tx below
 
     // Grant the allowance target an allowance to spend our tokens.
     try {
+      const permit2Address = swapQuoteJSON.issues.allowance.spender;
       const approveTx = await ERC20TokenContract.approve(
         permit2Address,
         maxApproval
@@ -329,9 +337,26 @@ async function trySwap(
     }
 
     try {
+      const toAddress = swapQuoteJSON.transaction.to;
+      const gas = !!swapQuoteJSON?.transaction.gas
+        ? BigInt(swapQuoteJSON?.transaction.gas)
+        : undefined;
+      const gasPrice = swapQuoteJSON.transaction.gasPrice;
+      const value = swapQuoteJSON.transaction.value;
+      const data = swapQuoteJSON.transaction.data;
+
       // Perform the swap
-      const receipt = await signer.sendTransaction(swapTx);
-      return receipt.toString();
+      const receipt = await signer.sendTransaction({
+        data: data,
+        gasLimit: gas,
+        gasPrice,
+        to: toAddress,
+        value,
+        chainId,
+      });
+
+      console.log(receipt.hash);
+      return `swap tx sent with tx hash: ${receipt.hash}`;
     } catch (e) {
       console.log(`swap tx failed: ${e}`);
       return "swap failed, likely lack of funds";

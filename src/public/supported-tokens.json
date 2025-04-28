@@ -16673,8 +16673,8 @@
     },
     {
       "chainId": 1,
-      "address": "0x5e21d1ee5cf0077b314c381720273ae82378d613",
-      "name": "The Infinite Garden",
+      "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+      "name": "ETH",
       "symbol": "ETH",
       "decimals": 18,
       "logoURI": "https://assets.coingecko.com/coins/images/34540/thumb/film.jpg?1705338132"
