@@ -1,3 +1,4 @@
+import { Button } from '@/components/shadcn/button';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 
 const Web3AuthTest = () => {
@@ -26,12 +27,7 @@ const Web3AuthTest = () => {
       {!isConnected ? (
         <div className="text-center">
           <p className="text-gray-600 mb-6">Connect your wallet to access the application</p>
-          <button
-            onClick={handleConnect}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200 transform cursor-pointer"
-          >
-            Connect Wallet
-          </button>
+          <Button onClick={handleConnect}>Connect Wallet</Button>
         </div>
       ) : (
         <div className="space-y-6">
@@ -75,12 +71,9 @@ const Web3AuthTest = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2.5 px-4 rounded-lg transition duration-200 cursor-pointer"
-          >
+          <Button variant="destructive" onClick={handleLogout}>
             Logout
-          </button>
+          </Button>
         </div>
       )}
     </div>

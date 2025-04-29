@@ -23,6 +23,8 @@
   "dependencies": {
     "@loadable/component": "^5.16.4",
     "@privy-io/react-auth": "^2.10.0",
+    "@radix-ui/react-dialog": "^1.1.11",
+    "@radix-ui/react-slot": "^1.2.0",
     "@solana/web3.js": "^1.98.2",
     "@web3auth/auth-adapter": "^9.7.0",
     "@web3auth/base": "^9.7.0",
@@ -30,9 +32,15 @@
     "@web3auth/modal": "^9.7.0",
     "@web3auth/modal-react-hooks": "^9.7.0",
     "@web3auth/solana-provider": "^9.7.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "hotkeys-js": "^3.13.9",
+    "lucide-react": "^0.503.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.5.3",
+    "tailwind-merge": "^3.2.0",
+    "tw-animate-css": "^1.2.8",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
