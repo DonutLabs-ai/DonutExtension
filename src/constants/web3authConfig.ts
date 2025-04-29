@@ -3,7 +3,7 @@ import { Web3AuthOptions } from '@web3auth/modal';
 import { SolanaPrivateKeyProvider } from '@web3auth/solana-provider';
 
 // get from https://dashboard.web3auth.io
-export const clientId = import.meta.env.VITE_WEB3AUTH_CLIENT_ID;
+export const clientId = import.meta.env.VITE_APP_WEB3AUTH_CLIENT_ID;
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
