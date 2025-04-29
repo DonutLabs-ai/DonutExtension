@@ -21,6 +21,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@loadable/component": "^5.16.4",
     "@privy-io/react-auth": "^2.10.0",
     "@solana/web3.js": "^1.98.2",
     "@web3auth/auth-adapter": "^9.7.0",
@@ -31,6 +32,7 @@
     "@web3auth/solana-provider": "^9.7.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.3",
     "zustand": "^5.0.3"
   },
   "devDependencies": {
@@ -38,6 +40,7 @@
     "@commitlint/config-conventional": "^19.8.0",
     "@eslint/js": "^9.25.1",
     "@tailwindcss/vite": "^4.1.4",
+    "@types/loadable__component": "^5.13.9",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.2",
     "@wxt-dev/module-react": "^1.1.3",

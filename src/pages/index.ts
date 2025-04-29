@@ -1,2 +1,0 @@
-// Page component exports
-export {};

@@ -1,11 +1,14 @@
 import Web3AuthLayout from '@/layouts/Web3AuthLayout';
-import Web3AuthTest from '@/pages/Web3AuthTest';
+import Router from '@/routes';
+import { HashRouter } from 'react-router-dom';
 
 function App() {
   return (
-    <Web3AuthLayout>
-      <Web3AuthTest />
-    </Web3AuthLayout>
+    <HashRouter>
+      <Web3AuthLayout>
+        <Router />
+      </Web3AuthLayout>
+    </HashRouter>
   );
 }
 
