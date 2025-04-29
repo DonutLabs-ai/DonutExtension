@@ -1,0 +1,13 @@
+# dependencies
+node_modules
+.pnp
+.pnp.js
+
+# build
+dist
+build
+.output
+.wxt
+
+# misc
+.DS_Store
