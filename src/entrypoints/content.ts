@@ -34,6 +34,10 @@ export default defineContentScript({
 
     ui.mount();
 
+    await injectScript('/buildDomTree.js', {
+      keepInDom: true,
+    });
+
     console.log('Donut Extension content script loaded');
   },
 });
