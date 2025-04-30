@@ -25,7 +25,13 @@ export default defineConfig({
   }),
   manifest: {
     name: 'Donut Extension',
-    permissions: ['storage'],
+    permissions: ['storage', 'scripting'],
     host_permissions: ['<all_urls>'],
+    web_accessible_resources: [
+      {
+        resources: ['buildDomTree.js'],
+        matches: ['*://*/*'],
+      },
+    ],
   },
 });
