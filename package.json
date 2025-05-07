@@ -21,6 +21,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@floating-ui/react-dom": "^2.1.2",
     "@loadable/component": "^5.16.4",
     "@privy-io/react-auth": "^2.10.0",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -34,6 +35,8 @@
     "@web3auth/solana-provider": "^9.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "downshift": "^9.0.9",
     "hotkeys-js": "^3.13.9",
     "lucide-react": "^0.503.0",
     "react": "^19.1.0",
