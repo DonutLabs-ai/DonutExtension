@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { XIcon } from 'lucide-react';
 import { cn } from '@/utils/shadcn';
 import { getShadowRootContainer } from '@/entrypoints/content';
 
@@ -11,8 +10,6 @@ interface ModalProps {
   className?: string;
   overlayClassName?: string;
   contentClassName?: string;
-  closeButtonClassName?: string;
-  showCloseButton?: boolean;
   container?: HTMLElement | null;
 }
 
@@ -23,8 +20,6 @@ const Modal: React.FC<ModalProps> = ({
   className,
   overlayClassName,
   contentClassName,
-  closeButtonClassName,
-  showCloseButton = true,
   container,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -86,12 +81,13 @@ const Modal: React.FC<ModalProps> = ({
       <div
         ref={overlayRef}
         className={cn('fixed inset-0 bg-black/50 transition-opacity', overlayClassName)}
+        onClick={onClose}
       />
 
       {/* Modal content */}
       <div
         className={cn(
-          'fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg bg-white p-6 shadow-lg',
+          'fixed top-[40%] left-[50%] z-[1010] w-full max-w-[calc(100%-2rem)] translate-x-[-50%]',
           'animate-in fade-in-0 zoom-in-95 duration-200',
           contentClassName
         )}
@@ -100,20 +96,6 @@ const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
       >
         {children}
-
-        {/* Close button */}
-        {showCloseButton && (
-          <button
-            className={cn(
-              'absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:outline-none',
-              closeButtonClassName
-            )}
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <XIcon size={18} />
-          </button>
-        )}
       </div>
     </div>
   );
