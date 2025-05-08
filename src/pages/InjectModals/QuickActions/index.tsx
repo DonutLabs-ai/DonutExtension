@@ -55,7 +55,7 @@ const QuickActions: React.FC<QuickActionsProps> = ({ isOpen, onClose }) => {
           {actions.map(action => (
             <button
               key={action.id}
-              className="flex flex-col items-center justify-center p-4 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className="flex flex-col items-center justify-center p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
               onClick={action.action}
             >
               <span className="text-2xl mb-2">{action.icon}</span>

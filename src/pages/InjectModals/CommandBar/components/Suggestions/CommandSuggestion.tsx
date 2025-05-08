@@ -137,15 +137,15 @@ const CommandSuggestion: React.FC = () => {
           className={cn(
             'w-full px-3 py-2.5 rounded-lg font-medium cursor-pointer transition-all duration-150',
             'flex items-center',
-            index === activeIndex ? 'bg-[#BBB1D938]' : 'bg-white'
+            index === activeIndex ? 'bg-accent' : 'bg-background'
           )}
           onMouseEnter={() => setActiveIndex(index)}
           onClick={() => handleCommandSelect(command.id)}
         >
-          <span className="mr-2 text-sm px-1.5 py-0.5 bg-gray-200 rounded text-gray-700">/</span>
+          <span className="mr-2 text-sm px-1.5 py-0.5 bg-secondary rounded text-foreground">/</span>
           {command.name}
           {command.description && (
-            <span className="ml-2 text-sm text-gray-500">{command.description}</span>
+            <span className="ml-2 text-sm text-muted-foreground">{command.description}</span>
           )}
         </div>
       ))}

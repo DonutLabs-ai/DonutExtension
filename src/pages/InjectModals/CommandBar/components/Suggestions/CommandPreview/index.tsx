@@ -28,7 +28,7 @@ const CommandPreview: React.FC<CommandPreviewProps> = ({
 
   return (
     <div className={cn('w-full px-5 py-3', className)}>
-      <div className="text-sm font-medium text-gray-700 mb-3">Transaction Preview</div>
+      <div className="text-sm font-medium text-foreground mb-3">Transaction Preview</div>
 
       {parsedCommand.commandId === 'swap' && (
         <SwapPreview
@@ -47,7 +47,7 @@ const CommandPreview: React.FC<CommandPreviewProps> = ({
       )}
 
       {parsedCommand.commandId !== 'swap' && parsedCommand.commandId !== 'send' && (
-        <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
+        <div className="p-4 bg-muted rounded-lg text-center text-muted-foreground">
           Preview not supported for this command type
         </div>
       )}

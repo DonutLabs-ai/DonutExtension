@@ -109,27 +109,27 @@ const AddressSuggestion: React.FC = () => {
   if (filteredAddresses.length === 0) {
     return (
       <div className="w-full px-5 py-3">
-        <div className="text-gray-500 text-sm">No matching saved addresses found</div>
+        <div className="text-muted-foreground text-sm">No matching saved addresses found</div>
       </div>
     );
   }
 
   return (
     <div className="w-full px-5 py-3 space-y-1">
-      <div className="text-sm font-medium text-gray-500 mb-2">Saved Addresses</div>
+      <div className="text-sm font-medium text-muted-foreground mb-2">Saved Addresses</div>
       {filteredAddresses.map((addr, index) => (
         <div
           key={addr.address}
           className={cn(
             'w-full px-3 py-2.5 rounded-lg font-medium cursor-pointer transition-all duration-150 border border-accent',
-            activeIndex === index ? 'bg-[#BBB1D938] ' : 'bg-white'
+            activeIndex === index ? 'bg-accent' : 'bg-background'
           )}
           onMouseEnter={() => setActiveIndex(index)}
           onClick={() => handleAddressSelect(addr.address)}
         >
           <div className="flex flex-col">
             <span className="font-medium">{addr.name}</span>
-            <span className="text-sm text-gray-500 truncate">{addr.address}</span>
+            <span className="text-sm text-muted-foreground truncate">{addr.address}</span>
           </div>
         </div>
       ))}

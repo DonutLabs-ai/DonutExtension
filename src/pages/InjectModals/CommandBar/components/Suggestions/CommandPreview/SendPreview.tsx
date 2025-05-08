@@ -30,15 +30,15 @@ const SendPreview: React.FC<SendPreviewProps> = ({
   const usdValue = token === 'SOL' ? 118.62 * parseFloat(amount) : 0;
 
   return (
-    <div className="bg-white rounded-lg p-3">
+    <div className="bg-background rounded-lg p-3">
       {/* Transaction area */}
       <div className="flex items-center justify-between mb-4">
         {/* Sending area */}
-        <div className="bg-gray-100 rounded-lg p-3 w-5/12">
-          <div className="text-sm text-gray-500 mb-2">Sending</div>
+        <div className="bg-muted rounded-lg p-3 w-5/12">
+          <div className="text-sm text-muted-foreground mb-2">Sending</div>
           <div className="flex items-center justify-between">
             <div className="text-xl font-medium">{amount}</div>
-            <div className="flex items-center space-x-1 bg-gray-200 rounded-full py-1 px-2 w-fit">
+            <div className="flex items-center space-x-1 bg-secondary rounded-full py-1 px-2 w-fit">
               <span className="font-medium">{token}</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -60,7 +60,7 @@ const SendPreview: React.FC<SendPreviewProps> = ({
 
         {/* Send icon */}
         <div className="flex-shrink-0">
-          <div className="w-6 h-6 mx-auto text-gray-500">
+          <div className="w-6 h-6 mx-auto text-muted-foreground">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -79,8 +79,8 @@ const SendPreview: React.FC<SendPreviewProps> = ({
         </div>
 
         {/* Recipient area */}
-        <div className="bg-gray-100 rounded-lg p-3 w-5/12">
-          <div className="text-sm text-gray-500 mb-2">Recipient</div>
+        <div className="bg-muted rounded-lg p-3 w-5/12">
+          <div className="text-sm text-muted-foreground mb-2">Recipient</div>
           <div className="font-medium truncate" title={address}>
             {shortAddress}
           </div>
@@ -90,13 +90,13 @@ const SendPreview: React.FC<SendPreviewProps> = ({
       {/* Transaction information */}
       <div className="flex flex-col space-y-1 mb-4 text-sm">
         <div className="flex justify-between">
-          <span className="text-gray-500">Transaction Fee</span>
-          <span className="text-gray-700">{transactionFee} SOL</span>
+          <span className="text-muted-foreground">Transaction Fee</span>
+          <span className="text-foreground">{transactionFee} SOL</span>
         </div>
         {token === 'SOL' && usdValue > 0 && (
           <div className="flex justify-between">
-            <span className="text-gray-500">USD Value</span>
-            <span className="text-gray-700">${usdValue.toFixed(2)}</span>
+            <span className="text-muted-foreground">USD Value</span>
+            <span className="text-foreground">${usdValue.toFixed(2)}</span>
           </div>
         )}
       </div>
@@ -106,7 +106,7 @@ const SendPreview: React.FC<SendPreviewProps> = ({
         <button
           onClick={executeCommand}
           disabled={isExecuting}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium transition-colors duration-200 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+          className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed"
         >
           {isExecuting ? 'Processing...' : 'Confirm Send'}
         </button>

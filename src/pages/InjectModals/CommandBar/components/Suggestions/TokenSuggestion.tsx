@@ -107,14 +107,14 @@ const TokenSuggestion: React.FC = () => {
   if (filteredTokens.length === 0) {
     return (
       <div className="w-full px-5 py-3">
-        <div className="text-gray-500 text-sm">No matching tokens found</div>
+        <div className="text-muted-foreground text-sm">No matching tokens found</div>
       </div>
     );
   }
 
   return (
     <div className="w-full px-5 py-3">
-      <div className="text-sm font-medium text-gray-500 mb-2">Select Token</div>
+      <div className="text-sm font-medium text-muted-foreground mb-2">Select Token</div>
       <div className="grid grid-cols-2 gap-2">
         {filteredTokens.map((token, index) => (
           <div
@@ -122,18 +122,20 @@ const TokenSuggestion: React.FC = () => {
             className={cn(
               'px-3 py-2 rounded-lg cursor-pointer transition-colors duration-150',
               'flex items-center justify-between',
-              activeIndex === index ? 'bg-[#BBB1D938]' : 'bg-white hover:bg-gray-50'
+              activeIndex === index ? 'bg-accent' : 'bg-background hover:bg-muted'
             )}
             onMouseEnter={() => setActiveIndex(index)}
             onClick={() => handleTokenSelect(token.symbol)}
           >
             <div className="flex items-center">
-              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs mr-2">
+              <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs mr-2">
                 {token.symbol.charAt(0)}
               </div>
               <span className="font-medium">{token.symbol}</span>
             </div>
-            <span className="text-xs text-gray-500 truncate max-w-[80px]">{token.name}</span>
+            <span className="text-xs text-muted-foreground truncate max-w-[80px]">
+              {token.name}
+            </span>
           </div>
         ))}
       </div>
