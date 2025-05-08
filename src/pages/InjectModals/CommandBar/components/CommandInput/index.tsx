@@ -1,20 +1,30 @@
 import React from 'react';
-import { useCommandInputStore } from '@/pages/InjectModals/CommandBar/store/commandInputStore';
-import BaseInput from './BaseInput';
 import { cn } from '@/utils/shadcn';
+import { useCommandExecution } from '../../hooks/useCommandExecution';
+import { useCommandInput } from '../../hooks/useCommandInput';
+import InputField from './InputField';
+import ResultMessage from './ResultMessage';
 
 interface CommandInputProps {
   className?: string;
 }
 
 const CommandInput: React.FC<CommandInputProps> = ({ className }) => {
-  const { inputStack } = useCommandInputStore();
+  const { parsedCommand } = useCommandInput();
+  const { executeCurrentCommand, resultMessage, isExecuting } = useCommandExecution();
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    // Execute command when Enter key is pressed without Shift key
+    if (e.key === 'Enter' && !e.shiftKey && parsedCommand?.isComplete) {
+      e.preventDefault();
+      executeCurrentCommand();
+    }
+  };
 
   return (
-    <div className={cn('flex gap-1', className)}>
-      {inputStack.map((input, index) => (
-        <BaseInput key={input.id} id={input.id} index={index} />
-      ))}
+    <div className={cn('w-full relative', className)} onKeyDown={handleKeyDown}>
+      <InputField />
+      <ResultMessage message={resultMessage} isExecuting={isExecuting} />
     </div>
   );
 };
