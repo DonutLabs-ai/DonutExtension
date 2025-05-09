@@ -1,7 +1,7 @@
-import loadable from '@loadable/component';
+import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
-const Web3AuthTest = loadable(() => import('@/pages/Web3AuthTest'));
+const Web3AuthTest = lazy(() => import('@/pages/Web3AuthTest'));
 
 const Router = () => (
   <Routes>
