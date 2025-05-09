@@ -1,29 +1,33 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/utils/shadcn';
 import { useCommandInputStore } from '../../store/commandInputStore';
 import { getWordAtPosition } from '../../utils/commandParser';
 import { handleSuggestionSelect } from '../../utils/handleSuggestionSelect';
+import { useTokenStore } from '@/store/tokenStore';
+import type { TokenInfo } from '@/store/tokenStore';
 
-interface Token {
+interface TokenItem {
   symbol: string;
   name: string;
-  value: string;
+  logoURI?: string;
+  price: number;
+  balance: number;
 }
-
-// Example token list - in a real application, this should be fetched from an API or data store
-export const tokens: Token[] = [
-  { symbol: 'SOL', name: 'Solana', value: 'SOL' },
-  { symbol: 'USDC', name: 'USD Coin', value: 'USDC' },
-  { symbol: 'ETH', name: 'Ethereum', value: 'ETH' },
-  { symbol: 'BTC', name: 'Bitcoin', value: 'BTC' },
-  { symbol: 'USDT', name: 'Tether', value: 'USDT' },
-  { symbol: 'DAI', name: 'Dai', value: 'DAI' },
-  { symbol: 'MATIC', name: 'Polygon', value: 'MATIC' },
-  { symbol: 'LINK', name: 'Chainlink', value: 'LINK' },
-];
 
 const TokenSuggestion: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const tokensObj = useTokenStore(state => state.tokens);
+  const tokens = useMemo<TokenItem[]>(
+    () =>
+      Object.values<TokenInfo>(tokensObj).map(t => ({
+        symbol: t.symbol,
+        name: t.name,
+        logoURI: t.logoURI,
+        price: t.price,
+        balance: t.uiBalance,
+      })),
+    [tokensObj]
+  );
   const {
     inputValue,
     cursorPosition,
@@ -40,10 +44,11 @@ const TokenSuggestion: React.FC = () => {
   }, [inputValue, cursorPosition]);
 
   // Filter tokens
-  const filteredTokens = useMemo(() => {
-    // If current word is empty or only spaces, show all tokens
+  const filteredTokens: TokenItem[] = useMemo(() => {
+    if (tokens.length === 0) return [];
+    // If current word is empty or only spaces, show first 50 tokens
     if (!currentWord.word || currentWord.word.trim() === '') {
-      return tokens;
+      return tokens.slice(0, 50);
     }
 
     const query = currentWord.word.toLowerCase();
@@ -53,32 +58,36 @@ const TokenSuggestion: React.FC = () => {
     );
 
     // If no matches found, return all tokens
-    return filtered.length > 0 ? filtered : tokens;
-  }, [currentWord]);
+    return (filtered.length > 0 ? filtered : tokens).slice(0, 50);
+  }, [currentWord, tokens]);
 
   // Handle token selection - using the generic handler function
-  const handleTokenSelect = (tokenSymbol: string) => {
-    handleSuggestionSelect({
+  const handleTokenSelect = useCallback(
+    (tokenSymbol: string) => {
+      handleSuggestionSelect({
+        inputValue,
+        cursorPosition,
+        selectedValue: tokenSymbol,
+        parsedCommand,
+        setInputValue,
+        setCursorPosition,
+        setActiveSuggestion,
+        setParsedCommand,
+      });
+    },
+    [
       inputValue,
       cursorPosition,
-      selectedValue: tokenSymbol,
       parsedCommand,
       setInputValue,
       setCursorPosition,
       setActiveSuggestion,
       setParsedCommand,
-    });
-  };
+    ]
+  );
 
-  // Simplified keyboard navigation, only supports up/down arrows
+  // Add keyboard navigation listener once
   useEffect(() => {
-    if (filteredTokens.length === 0) return;
-
-    // Ensure active index is within valid range
-    if (activeIndex >= filteredTokens.length) {
-      setActiveIndex(0);
-    }
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown') {
         e.preventDefault();
@@ -87,15 +96,24 @@ const TokenSuggestion: React.FC = () => {
         e.preventDefault();
         setActiveIndex(prev => (prev > 0 ? prev - 1 : filteredTokens.length - 1));
       } else if (e.key === 'Enter') {
-        // Select the currently active token with Enter key
         e.preventDefault();
-        handleTokenSelect(filteredTokens[activeIndex].symbol);
+        // Guard index range
+        if (filteredTokens[activeIndex]) {
+          handleTokenSelect(filteredTokens[activeIndex].symbol);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filteredTokens, activeIndex, handleTokenSelect]);
+
+  // Ensure activeIndex stays within bounds when token list changes
+  useEffect(() => {
+    if (activeIndex >= filteredTokens.length) {
+      setActiveIndex(0);
+    }
+  }, [filteredTokens.length]);
 
   // Reset state when component unmounts
   useEffect(() => {
@@ -122,20 +140,37 @@ const TokenSuggestion: React.FC = () => {
             className={cn(
               'px-3 py-2 rounded-lg cursor-pointer transition-colors duration-150',
               'flex items-center justify-between',
-              activeIndex === index ? 'bg-accent' : 'bg-background hover:bg-muted'
+              activeIndex === index ? 'bg-accent' : 'bg-background'
             )}
             onMouseEnter={() => setActiveIndex(index)}
             onClick={() => handleTokenSelect(token.symbol)}
           >
-            <div className="flex items-center">
-              <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs mr-2">
-                {token.symbol.charAt(0)}
+            <div className="flex items-center gap-2">
+              {token.logoURI ? (
+                <img
+                  src={token.logoURI}
+                  alt={token.symbol}
+                  className="w-6 h-6 rounded-full object-contain"
+                />
+              ) : (
+                <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs">
+                  {token.symbol.charAt(0)}
+                </div>
+              )}
+              <div className="flex flex-col">
+                <span className="font-medium leading-none">{token.symbol}</span>
+                <span className="text-xs text-muted-foreground leading-none">{token.name}</span>
               </div>
-              <span className="font-medium">{token.symbol}</span>
             </div>
-            <span className="text-xs text-muted-foreground truncate max-w-[80px]">
-              {token.name}
-            </span>
+
+            <div className="flex flex-col items-end">
+              <span className="text-xs font-medium">
+                {token.balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                ${Number(token.price || 0).toFixed(2)}
+              </span>
+            </div>
           </div>
         ))}
       </div>

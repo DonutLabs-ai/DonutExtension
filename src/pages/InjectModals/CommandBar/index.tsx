@@ -30,7 +30,7 @@ const CommandBar: React.FC<CommandBarProps> = ({ isOpen, onClose }) => {
       contentClassName="max-w-lg"
       container={getShadowRootContainer()}
     >
-      <div className="relative w-full bg-white rounded-2xl shadow-lg border border-gray-100 overflow-visible transition-all duration-200">
+      <div className="relative w-full bg-background rounded-2xl shadow-lg border border-accent transition-all duration-200 overflow-hidden">
         <div className="py-6 px-7">
           <CommandInput />
         </div>

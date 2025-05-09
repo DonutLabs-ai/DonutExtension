@@ -5,6 +5,7 @@ import CommandSuggestion from './CommandSuggestion';
 import TokenSuggestion from './TokenSuggestion';
 import AddressSuggestion from './AddressSuggestion';
 import CommandPreview from './CommandPreview';
+import { ScrollArea } from '@/components/shadcn/scroll-area';
 
 const Suggestions: React.FC = () => {
   const { parsedCommand, activeSuggestion } = useCommandInputStore();
@@ -32,7 +33,7 @@ const Suggestions: React.FC = () => {
   }
 
   return (
-    <div className="w-full transition-all duration-200 max-h-60 overflow-y-auto border-t border-muted-foreground">
+    <ScrollArea className="w-full max-h-60 flex flex-col border-t border-muted-foreground">
       {activeSuggestion === SuggestionType.Command && <CommandSuggestion />}
       {activeSuggestion === SuggestionType.Token && <TokenSuggestion />}
       {activeSuggestion === SuggestionType.Address && <AddressSuggestion />}
@@ -43,7 +44,7 @@ const Suggestions: React.FC = () => {
           isExecuting={isExecuting}
         />
       )}
-    </div>
+    </ScrollArea>
   );
 };
 

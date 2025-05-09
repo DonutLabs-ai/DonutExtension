@@ -1,5 +1,5 @@
 import { COMMANDS, CommandDefinition, ParamType, CommandParam } from '../store/commandDefinitions';
-import { tokens } from '../components/Suggestions/TokenSuggestion';
+import { getTokens } from '@/store/tokenStore';
 import { validateParamValue } from './validateParamValue';
 
 export interface ParsedParam {
@@ -41,13 +41,16 @@ function isLikelyParamType(word: string, paramType: ParamType): boolean {
       // 1. Exact match to any token symbol (case insensitive)
       // 2. Token symbol contains or is contained by the word (case insensitive)
       // 3. Matches the beginning of a token name (case insensitive)
-      return tokens.some(
-        token =>
-          token.symbol.toLowerCase() === word.toLowerCase() ||
-          token.symbol.toLowerCase().includes(word.toLowerCase()) ||
-          word.toLowerCase().includes(token.symbol.toLowerCase()) ||
-          token.name.toLowerCase().startsWith(word.toLowerCase())
-      );
+      return getTokens().some(token => {
+        const w = word.toLowerCase();
+        const sym = token.symbol.toLowerCase();
+        const name = token.name.toLowerCase();
+
+        // Exact symbol match always qualifies
+        if (sym === w) return true;
+
+        return sym.includes(w) || w.includes(sym) || name.startsWith(w);
+      });
 
     case ParamType.Address:
       // Text that looks like a Solana address:
@@ -228,7 +231,16 @@ function assignParameters(
   cursorPosition: number,
   currentParamId: string | null
 ): void {
-  for (const wordPos of wordPositions) {
+  const iterable =
+    paramType === ParamType.Token
+      ? [...wordPositions].sort((a, b) => {
+          const aComplete = validateParamValue(a.word, ParamType.Token) ? 1 : 0;
+          const bComplete = validateParamValue(b.word, ParamType.Token) ? 1 : 0;
+          return bComplete - aComplete; // complete first
+        })
+      : wordPositions;
+
+  for (const wordPos of iterable) {
     const { word } = wordPos;
 
     // Skip if already assigned

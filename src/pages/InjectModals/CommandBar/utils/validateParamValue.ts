@@ -1,5 +1,5 @@
 import { ParamType } from '../store/commandDefinitions';
-import { tokens } from '../components/Suggestions/TokenSuggestion';
+import { getTokens } from '@/store/tokenStore';
 
 /**
  * Enhanced parameter value validation function
@@ -29,7 +29,7 @@ export function validateParamValue(value: string, paramType: ParamType): boolean
 
     case ParamType.Token: {
       // Loose matching: if the input is a complete token name (case insensitive), consider it valid
-      return tokens.some(
+      return getTokens().some(
         token =>
           // Exact match of symbol (case insensitive)
           token.symbol.toLowerCase() === cleanValue.toLowerCase() ||
