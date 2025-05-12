@@ -1,12 +1,23 @@
+import { initBackgroundTransport } from '@/utils/transport';
 import { registerTokenService, startTokenServiceSchedulers } from '@/services/tokenService';
+import { registerSwapService } from '@/services/swapService';
+import { registerPopupEventService } from '@/services/popupEventService';
+import { initStoreBackend } from '@/stores';
 
 export default {
-  main() {
-    // Register the proxy service so it can be called from other contexts
-    registerTokenService();
-    // Start scheduled refresh tasks
-    startTokenServiceSchedulers();
+  async main() {
+    // Step 1: Initialize transport layer
+    initBackgroundTransport();
 
-    console.log('Background initialized with TokenService', { id: browser.runtime.id });
+    // Step 2: Initialize all store backends
+    await initStoreBackend();
+
+    // Step 3: Register RPC services
+    registerTokenService();
+    registerSwapService();
+    registerPopupEventService();
+
+    // Step 4: Start token service schedulers
+    startTokenServiceSchedulers();
   },
 };

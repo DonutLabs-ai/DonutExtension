@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/utils/shadcn';
+import { useTokenStore } from '@/stores/tokenStore';
+import type { TokenInfo } from '@/stores/tokenStore';
 import { useCommandInputStore } from '../../store/commandInputStore';
 import { getWordAtPosition } from '../../utils/commandParser';
 import { handleSuggestionSelect } from '../../utils/handleSuggestionSelect';
-import { useTokenStore } from '@/store/tokenStore';
-import type { TokenInfo } from '@/store/tokenStore';
 
 interface TokenItem {
   symbol: string;
@@ -113,7 +113,7 @@ const TokenSuggestion: React.FC = () => {
     if (activeIndex >= filteredTokens.length) {
       setActiveIndex(0);
     }
-  }, [filteredTokens.length]);
+  }, [activeIndex, filteredTokens.length]);
 
   // Reset state when component unmounts
   useEffect(() => {

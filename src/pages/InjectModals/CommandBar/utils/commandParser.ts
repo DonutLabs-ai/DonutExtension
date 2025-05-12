@@ -1,5 +1,5 @@
-import { COMMANDS, CommandDefinition, ParamType, CommandParam } from '../store/commandDefinitions';
-import { getTokens } from '@/store/tokenStore';
+import { COMMANDS, CommandDefinition, ParamType } from '../store/commandDefinitions';
+import { getTokens } from '@/stores/tokenStore';
 import { validateParamValue } from './validateParamValue';
 
 export interface ParsedParam {
@@ -458,50 +458,4 @@ export function replaceTextRange(
   replacement: string
 ): string {
   return originalText.substring(0, startPos) + replacement + originalText.substring(endPos);
-}
-
-/**
- * Execute a command
- * @param parsedCommand Parsed command
- * @returns Execution result
- */
-export function executeCommand(
-  parsedCommand: ParsedCommand
-): Promise<{ success: boolean; message: string }> {
-  return new Promise(resolve => {
-    if (!parsedCommand?.command || !parsedCommand.isComplete) {
-      resolve({ success: false, message: 'Command incomplete or invalid' });
-      return;
-    }
-
-    // Example implementation: Execute different operations based on command
-    switch (parsedCommand.commandId) {
-      case 'swap':
-        // Simulate executing Swap command
-        setTimeout(() => {
-          const amount = parsedCommand.params.amount?.value || '';
-          const fromToken = parsedCommand.params.fromToken?.value || '';
-          const toToken = parsedCommand.params.toToken?.value || '';
-          resolve({
-            success: true,
-            message: `Successfully exchanged ${amount} ${fromToken} to ${toToken}`,
-          });
-        }, 500);
-        break;
-      case 'send':
-        // Simulate executing Send command
-        setTimeout(() => {
-          const amount = parsedCommand.params.amount?.value || '';
-          const token = parsedCommand.params.token?.value || '';
-          const address = parsedCommand.params.address?.value || '';
-          resolve({
-            success: true,
-            message: `Successfully sent ${amount} ${token} to ${address}`,
-          });
-        }, 500);
-        break;
-      default:
-        resolve({ success: false, message: 'Unknown command' });
-    }
-  });
 }

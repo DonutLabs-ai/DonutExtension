@@ -97,6 +97,7 @@ const AddressSuggestion: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredAddresses, activeIndex, currentWord]);
 
   // Reset state when component unmounts

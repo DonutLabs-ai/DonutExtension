@@ -118,7 +118,8 @@ const CommandSuggestion: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [filteredCommands, activeIndex, handleCommandSelect]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filteredCommands, activeIndex]);
 
   // Reset state when component unmounts
   useEffect(() => {

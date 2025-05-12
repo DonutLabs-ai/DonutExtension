@@ -1,7 +1,6 @@
 import { defineProxyService } from '@webext-core/proxy-service';
-import { sendTokenMessage } from '@/messaging/tokenMessaging';
-import type { TokenInfo } from '@/store/tokenStore';
-import { useUserStore } from '@/store/userStore';
+import { useTokenStore, type TokenInfo } from '@/stores/tokenStore';
+import { useWalletStore } from '@/stores/walletStore';
 
 // ---- Constants ----
 const TOKEN_LIST_TTL = 6 * 60 * 60 * 1000; // 6 hours
@@ -46,14 +45,14 @@ class TokenService {
         price: 0,
       })) as TokenInfo[];
       this.lastTokenListFetch = Date.now();
-      await this.broadcast('token/tokensUpdated', this.tokens);
+      useTokenStore.getState().setTokens(this.tokens);
     } catch (err) {
       console.error('[TokenService] Failed to refresh token list', err);
     }
   }
 
   async refreshBalances() {
-    const walletAddress = useUserStore.getState().walletAddress;
+    const walletAddress = useWalletStore.getState().address;
     if (!walletAddress) return;
 
     try {
@@ -76,7 +75,7 @@ class TokenService {
           const upd = balanceMap[t.mint];
           return upd ? { ...t, uiBalance: upd.uiBalance, balance: upd.balance } : t;
         });
-        await this.broadcast('token/balanceUpdated', balanceMap);
+        useTokenStore.getState().updateBalances(balanceMap);
       }
     } catch (err) {
       console.error('[TokenService] Failed to refresh balances', err);
@@ -109,31 +108,10 @@ class TokenService {
           const p = priceMap[t.mint];
           return p !== undefined ? { ...t, price: p } : t;
         });
-        await this.broadcast('token/priceUpdated', priceMap);
+        useTokenStore.getState().updatePrices(priceMap);
       }
     } catch (err) {
       console.error('[TokenService] Failed to refresh prices', err);
-    }
-  }
-
-  private async broadcast(key: string, payload: any) {
-    // Send to background (for storage) as well
-    void (sendTokenMessage as any)(key, payload).catch(() => {
-      /* ignore */
-    });
-
-    // Send to all active tabs
-    try {
-      const tabs = await browser.tabs.query({});
-      for (const tab of tabs) {
-        if (tab.id !== undefined) {
-          void (sendTokenMessage as any)(key, payload, tab.id).catch(() => {
-            /* ignore */
-          });
-        }
-      }
-    } catch {
-      /* ignore */
     }
   }
 }

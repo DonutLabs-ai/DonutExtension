@@ -1,62 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import hotkeys from 'hotkeys-js';
 import CommandBar from './CommandBar';
-import QuickActions from './QuickActions';
-
-// Define the popup component and its corresponding shortcut keys
-const MODAL_CONFIG = [
-  { id: 'commandBar', shortcut: 'ctrl+k', Component: CommandBar },
-  { id: 'quickActions', shortcut: 'ctrl+q', Component: QuickActions },
-];
+import { ToastProvider } from '@/components/ToastProvider';
 
 const InjectModals = () => {
-  const [activeModal, setActiveModal] = useState<string | null>(null);
-
-  // Close all pop-ups
-  const closeAllModals = () => {
-    setActiveModal(null);
-  };
-
-  // Toggle the popup display status
-  const toggleModal = (modalId: string) => {
-    setActiveModal(activeModal === modalId ? null : modalId);
-  };
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Register shortcut key
-    MODAL_CONFIG.forEach(({ id, shortcut }) => {
-      hotkeys(shortcut, event => {
-        event.preventDefault();
-        toggleModal(id);
-        return false;
-      });
+    hotkeys('ctrl+k,cmd+k', e => {
+      e.preventDefault();
+      setOpen(o => !o);
     });
-
-    // Global ESC key closes all pop-ups
     hotkeys('esc', () => {
-      if (activeModal) {
-        closeAllModals();
-        return false;
-      }
-      return true;
+      setOpen(false);
     });
-
-    // Component unloading cleanup
     return () => {
-      // Unbind all shortcut keys
-      MODAL_CONFIG.forEach(({ shortcut }) => {
-        hotkeys.unbind(shortcut);
-      });
+      hotkeys.unbind('ctrl+k,cmd+k');
       hotkeys.unbind('esc');
     };
-  }, [activeModal]);
+  }, []);
 
   return (
-    <div>
-      {MODAL_CONFIG.map(({ id, Component }) => (
-        <Component key={id} isOpen={activeModal === id} onClose={closeAllModals} />
-      ))}
-    </div>
+    <ToastProvider>
+      <CommandBar isOpen={open} onClose={() => setOpen(false)} />
+    </ToastProvider>
   );
 };
 

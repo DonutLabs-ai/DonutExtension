@@ -3,7 +3,6 @@ import { cn } from '@/utils/shadcn';
 import { useCommandExecution } from '../../hooks/useCommandExecution';
 import { useCommandInput } from '../../hooks/useCommandInput';
 import InputField from './InputField';
-import ResultMessage from './ResultMessage';
 
 interface CommandInputProps {
   className?: string;
@@ -11,7 +10,7 @@ interface CommandInputProps {
 
 const CommandInput: React.FC<CommandInputProps> = ({ className }) => {
   const { parsedCommand } = useCommandInput();
-  const { executeCurrentCommand, resultMessage, isExecuting } = useCommandExecution();
+  const { executeCurrentCommand } = useCommandExecution();
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     // Execute command when Enter key is pressed without Shift key
@@ -24,7 +23,6 @@ const CommandInput: React.FC<CommandInputProps> = ({ className }) => {
   return (
     <div className={cn('w-full relative', className)} onKeyDown={handleKeyDown}>
       <InputField />
-      <ResultMessage message={resultMessage} isExecuting={isExecuting} />
     </div>
   );
 };

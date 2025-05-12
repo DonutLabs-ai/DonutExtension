@@ -1,5 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ParsedCommand } from '../../../utils/commandParser';
+import { getSwapService } from '@/services/swapService';
+import { useTokenStore } from '@/stores/tokenStore';
+import { toRawAmount, toUiAmount } from '@/utils/amount';
+import { useDebouncedValue } from '@/hooks/useDebounce';
+import { useWalletStore } from '@/stores/walletStore';
 
 interface SwapPreviewProps {
   parsedCommand: ParsedCommand;
@@ -21,18 +26,89 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
   const fromToken = parsedCommand.params.fromToken?.value || '';
   const toToken = parsedCommand.params.toToken?.value || '';
 
-  // Simulated exchange rate data
-  const exchangeRate = 118.62;
-  const estimatedResult = parseFloat(amount) * exchangeRate;
+  const tokens = useTokenStore(state => state.tokens);
 
-  // Simulated fee data
-  const slippage = 0.000015;
-  const priorityFee = 0.00008;
-  const slippagePercent = 2;
-  const priorityFeePercent = 0.3;
+  const [estimatedOut, setEstimatedOut] = useState<string>('');
+  const [loadingQuote, setLoadingQuote] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
+
+  const debouncedAmount = useDebouncedValue(amount, 400);
+
+  // Fetch quote whenever params change
+  useEffect(() => {
+    // Basic validation
+    if (!debouncedAmount || !fromToken || !toToken) {
+      setEstimatedOut('');
+      return;
+    }
+
+    const fromMint = Object.values(tokens).find(
+      t => t.symbol.toLowerCase() === fromToken.toLowerCase()
+    )?.mint;
+    const toMint = Object.values(tokens).find(
+      t => t.symbol.toLowerCase() === toToken.toLowerCase()
+    )?.mint;
+
+    if (!fromMint || !toMint) {
+      setEstimatedOut('');
+      return;
+    }
+
+    const decimals = tokens[fromMint]?.decimals ?? 0;
+
+    const rawAmount = toRawAmount(debouncedAmount, decimals);
+
+    const svc = getSwapService();
+    const controller = new AbortController();
+    setLoadingQuote(true);
+    setQuoteError(null);
+
+    svc
+      .getQuote({ inputMint: fromMint, outputMint: toMint, amount: rawAmount, slippageBps: 50 })
+      .then(q => {
+        const outDecimals = tokens[toMint]?.decimals ?? 0;
+        setEstimatedOut(toUiAmount(q.outAmount, outDecimals));
+
+        // Extract additional route information
+        // Price impact if available
+        const priceImpact = q.priceImpactPct || 0;
+        // Convert string to number and handle percentage formatting
+        const numericPriceImpact =
+          typeof priceImpact === 'string' ? parseFloat(priceImpact) : priceImpact;
+        const formattedPriceImpact = (numericPriceImpact * 100).toFixed(2);
+
+        // Market info (exchanges used)
+        const routePlan = q.routePlan || [];
+        const exchanges = routePlan.map(route => route.swapInfo?.label || 'Unknown').join(', ');
+
+        // Add to the component state
+        setPriceImpact(formattedPriceImpact);
+        setExchangeInfo(exchanges);
+      })
+      .catch(err => {
+        console.error('Quote error', err);
+        setQuoteError(err?.message || 'Quote error');
+        setEstimatedOut('');
+      })
+      .finally(() => {
+        setLoadingQuote(false);
+      });
+
+    return () => controller.abort();
+  }, [debouncedAmount, fromToken, toToken, tokens]);
+
+  // Additional state for enhanced quote information
+  const [priceImpact, setPriceImpact] = useState('0.00');
+  const [exchangeInfo, setExchangeInfo] = useState('');
+
+  // Static placeholders for now (could be derived from quote route later)
+  const slippagePercent = 0.5; // default 0.5%
+  const priorityFee = 0.00001;
+  const priorityFeePercent = 0.1;
 
   return (
-    <div className="bg-background rounded-lg p-3">
+    <div className="bg-background rounded-lg">
+      {quoteError && <div className="text-sm text-red-600 mb-2">{quoteError}</div>}
       {/* Exchange area */}
       <div className="flex items-center justify-between mb-4">
         {/* Sell area */}
@@ -80,7 +156,7 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
         <div className="bg-muted rounded-lg p-3 w-5/12">
           <div className="text-sm text-muted-foreground mb-2">Buying</div>
           <div className="flex items-center justify-between">
-            <div className="text-xl font-medium">{estimatedResult.toFixed(2)}</div>
+            <div className="text-xl font-medium">{estimatedOut}</div>
             <div className="flex items-center space-x-1 bg-secondary rounded-full py-1 px-2 w-fit">
               {toToken === 'USDT' && (
                 <span className="w-5 h-5 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground text-xs mr-1">
@@ -111,8 +187,14 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
       <div className="flex flex-col space-y-1 mb-4 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Slippage</span>
-          <span className="text-foreground">
-            ~{slippagePercent}% ({slippage} {fromToken})
+          <span className="text-foreground">~{slippagePercent}%</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Price Impact</span>
+          <span
+            className={`text-foreground ${Number(priceImpact) > 5 ? 'text-amber-500' : Number(priceImpact) > 10 ? 'text-red-500' : ''}`}
+          >
+            {priceImpact}%
           </span>
         </div>
         <div className="flex justify-between">
@@ -122,19 +204,21 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
             <span className="ml-1 text-accent-foreground">⚡</span>
           </span>
         </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-muted-foreground"></span>
-          <span className="text-muted-foreground">
-            1{fromToken} ≈ ${exchangeRate} {toToken}
-          </span>
-        </div>
+        {exchangeInfo && (
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Route</span>
+            <span className="text-muted-foreground text-xs truncate max-w-[150px]">
+              {exchangeInfo}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Confirm button */}
       <div>
         <button
           onClick={executeCommand}
-          disabled={isExecuting}
+          disabled={isExecuting || loadingQuote}
           className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed"
         >
           {isExecuting ? 'Processing...' : 'Confirm Swap'}

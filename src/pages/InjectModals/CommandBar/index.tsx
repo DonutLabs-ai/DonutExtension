@@ -27,7 +27,7 @@ const CommandBar: React.FC<CommandBarProps> = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      contentClassName="max-w-lg"
+      contentClassName="max-w-2xl"
       container={getShadowRootContainer()}
     >
       <div className="relative w-full bg-background rounded-2xl shadow-lg border border-accent transition-all duration-200 overflow-hidden">

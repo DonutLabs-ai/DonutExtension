@@ -30,7 +30,7 @@ const SendPreview: React.FC<SendPreviewProps> = ({
   const usdValue = token === 'SOL' ? 118.62 * parseFloat(amount) : 0;
 
   return (
-    <div className="bg-background rounded-lg p-3">
+    <div className="bg-background rounded-lg">
       {/* Transaction area */}
       <div className="flex items-center justify-between mb-4">
         {/* Sending area */}

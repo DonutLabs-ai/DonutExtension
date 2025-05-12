@@ -2,7 +2,7 @@ import { Button } from '@/components/shadcn/button';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 
 const Web3AuthTest = () => {
-  const { isConnected, userInfo, connect, logout } = useWeb3Auth();
+  const { isConnected, userInfo, connect, logout, provider } = useWeb3Auth();
 
   const handleConnect = async () => {
     try {

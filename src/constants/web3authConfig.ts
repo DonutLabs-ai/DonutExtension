@@ -7,9 +7,9 @@ export const clientId = import.meta.env.VITE_APP_WEB3AUTH_CLIENT_ID;
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.SOLANA,
-  chainId: '0x2', // Please use 0x1 for Mainnet, 0x2 for Testnet, 0x3 for Devnet
-  rpcTarget: 'https://api.testnet.solana.com',
-  displayName: 'Solana Testnet',
+  chainId: '0x1', // Please use 0x1 for Mainnet, 0x2 for Testnet, 0x3 for Devnet
+  rpcTarget: import.meta.env.VITE_APP_SOLANA_RPC_URL,
+  displayName: 'Solana Mainnet',
   blockExplorerUrl: 'https://explorer.solana.com',
   ticker: 'SOL',
   tickerName: 'Solana',

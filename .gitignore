@@ -11,6 +11,7 @@ node_modules
 .output
 stats.html
 stats-*.json
+.cursor
 .wxt
 web-ext.config.ts
 

@@ -1,5 +1,5 @@
 import { ParamType } from '../store/commandDefinitions';
-import { getTokens } from '@/store/tokenStore';
+import { getTokens } from '@/stores/tokenStore';
 
 /**
  * Enhanced parameter value validation function
