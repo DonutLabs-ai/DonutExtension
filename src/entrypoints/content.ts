@@ -39,6 +39,7 @@ export default defineContentScript({
         name: 'donut-extension-ui',
         position: 'overlay',
         anchor: 'body',
+        mode: 'closed',
         onMount: container => {
           shadowRootContainer = container;
 
