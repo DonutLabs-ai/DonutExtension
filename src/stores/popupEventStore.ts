@@ -12,14 +12,11 @@ export enum PopupEventType {
   // Add more event types as needed
 }
 
-export type PopupEventStatus = 'pending' | 'processing';
-
 export interface PopupEvent {
   id: string;
   type: PopupEventType;
   data?: any; // Event-specific data
   createdAt: number;
-  status: PopupEventStatus;
 }
 
 // Internal event type to store Promise handlers
@@ -31,12 +28,15 @@ interface InternalPopupEvent extends PopupEvent {
 interface PopupEventStoreState {
   events: PopupEvent[]; // Public events (without resolve/reject)
   eventMap: Record<string, InternalPopupEvent>; // Internal events with promise handlers
-  activeEventId: string | null;
 
   // Actions
-  enqueueEvent: <T>(type: PopupEventType, data?: any) => Promise<T>;
-  dequeueEvent: () => PopupEvent | null;
-  setEventStatus: (id: string, status: PopupEventStatus) => void;
+  enqueueEvent: <T>(
+    type: PopupEventType,
+    data?: any
+  ) => {
+    event: PopupEvent;
+    promise: Promise<T>;
+  };
   removeEvent: (id: string) => void;
   resolveEvent: (id: string, result: any) => void;
   rejectEvent: (id: string, reason?: any) => void;
@@ -46,56 +46,44 @@ interface PopupEventStoreState {
 export const usePopupEventStore = create<PopupEventStoreState>((set, get) => ({
   events: [],
   eventMap: {},
-  activeEventId: null,
 
-  enqueueEvent: <T>(type: PopupEventType, data?: any): Promise<T> => {
-    return new Promise<T>((resolve, reject) => {
-      const id = nanoid();
-      const event: PopupEvent = {
-        id,
-        type,
-        data,
-        createdAt: Date.now(),
-        status: 'pending',
-      };
+  enqueueEvent: <T>(type: PopupEventType, data?: any) => {
+    let resolveFn: (value: any) => void;
+    let rejectFn: (reason?: any) => void;
 
-      const internalEvent: InternalPopupEvent = {
-        ...event,
-        resolve,
-        reject,
-      };
-
-      set(state => ({
-        events: [...state.events, event],
-        eventMap: { ...state.eventMap, [id]: internalEvent },
-      }));
+    const promise = new Promise<T>((resolve, reject) => {
+      resolveFn = resolve;
+      rejectFn = reject;
     });
-  },
 
-  dequeueEvent: () => {
-    const state = get();
-    const nextEvent = state.events.find(e => e.status === 'pending');
+    // Generate event
+    const id = nanoid();
+    const event: PopupEvent = {
+      id,
+      type,
+      data,
+      createdAt: Date.now(),
+    };
 
-    if (!nextEvent) return null;
+    const internalEvent: InternalPopupEvent = {
+      ...event,
+      resolve: resolveFn!,
+      reject: rejectFn!,
+    };
 
+    // Push into store
     set(state => ({
-      activeEventId: nextEvent.id,
-      events: state.events.map(e => (e.id === nextEvent.id ? { ...e, status: 'processing' } : e)),
+      events: [...state.events, event],
+      eventMap: { ...state.eventMap, [id]: internalEvent },
     }));
 
-    return nextEvent;
+    return { event, promise };
   },
 
   removeEvent: (id: string) => {
     set(state => ({
       events: state.events.filter(e => e.id !== id),
       eventMap: Object.fromEntries(Object.entries(state.eventMap).filter(([key]) => key !== id)),
-    }));
-  },
-
-  setEventStatus: (id, status) => {
-    set(state => ({
-      events: state.events.map(e => (e.id === id ? { ...e, status } : e)),
     }));
   },
 
@@ -120,16 +108,15 @@ export const usePopupEventStore = create<PopupEventStoreState>((set, get) => ({
   clearEvents: (rejectPending = true) => {
     set(state => {
       if (rejectPending) {
-        // Reject only pending events
+        // Reject all pending events
         Object.values(state.eventMap).forEach(event => {
           event.reject(new Error('Events cleared'));
         });
       }
 
       return {
-        events: rejectPending ? [] : state.events.filter(e => e.status !== 'pending'),
+        events: rejectPending ? [] : state.events,
         eventMap: {},
-        activeEventId: null,
       };
     });
   },

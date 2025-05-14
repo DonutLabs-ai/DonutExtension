@@ -4,7 +4,6 @@ import { TransactionSignData } from '@/services/popupEventService';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 import { SolanaWallet } from '@web3auth/solana-provider';
 import { VersionedTransaction } from '@solana/web3.js';
-import { Button } from '@/components/shadcn/button';
 
 interface TransactionSignViewProps {
   event: PopupEvent;
@@ -17,99 +16,52 @@ const TransactionSignView: React.FC<TransactionSignViewProps> = ({
   onApprove,
   onReject,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { provider } = useWeb3Auth();
+  const [statusMessage, setStatusMessage] = useState<string>('Processing transaction...');
+  const { status, provider } = useWeb3Auth();
 
-  // Ensure loading state resets whenever the component mounts or event changes
   useEffect(() => {
-    setLoading(false);
-    setError(null);
-  }, [event.id]);
+    if (!status || ['not_ready', 'ready', 'connecting'].includes(status)) return;
 
-  // Type guard to ensure we have transaction sign data
-  if (event.type !== PopupEventType.TRANSACTION_SIGN) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center p-4">
-        <div className="text-red-500 text-lg font-medium mb-4">Invalid Event</div>
-        <div className="text-center">This is not a transaction signing event</div>
-        <Button
-          variant="destructive"
-          className="mt-4"
-          onClick={() => onReject('Invalid event type')}
-        >
-          Close
-        </Button>
-      </div>
-    );
-  }
-
-  const data = event.data as TransactionSignData;
-
-  const handleApprove = async () => {
-    if (loading || !provider) return;
-
-    setLoading(true);
-    try {
-      const solanaWallet = new SolanaWallet(provider);
-      const txBuffer = Buffer.from(data.transaction, 'base64');
-      const tx = VersionedTransaction.deserialize(txBuffer);
-      const { signature } = await solanaWallet.signAndSendTransaction(tx);
-      await onApprove(signature);
-    } catch (error) {
-      console.error('Error approving transaction:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      setError(errorMessage);
-      setLoading(false);
+    if (status !== 'connected') {
+      onReject('Wallet not connected, please try again.').catch(console.error);
+      return;
     }
-  };
 
-  const handleReject = async () => {
-    if (loading) return;
+    if (!provider) return;
 
-    setLoading(true);
-    try {
-      await onReject('User rejected transaction signing');
-    } catch (error) {
-      console.error('Error rejecting transaction:', error);
-      setLoading(false);
-    }
-  };
+    const processTransaction = async () => {
+      try {
+        if (event.type !== PopupEventType.TRANSACTION_SIGN) {
+          throw new Error('Invalid event type');
+        }
+
+        const data = event.data as TransactionSignData;
+        const solanaWallet = new SolanaWallet(provider);
+        const txBuffer = Buffer.from(data.transaction, 'base64');
+        const tx = VersionedTransaction.deserialize(txBuffer);
+
+        setStatusMessage('Signing transaction...');
+        const { signature } = await solanaWallet.signAndSendTransaction(tx);
+
+        // Success - automatically close
+        await onApprove(signature);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        setStatusMessage(`Signing failed: ${errorMessage}`);
+
+        // Failed - pass error message and automatically close
+        await onReject(errorMessage);
+      }
+    };
+
+    processTransaction();
+  }, [event, status, provider, onApprove, onReject]);
 
   return (
-    <div className="flex h-full flex-col p-6">
-      <div className="flex-1">
-        <h2 className="text-xl font-semibold mb-6 text-foreground">Sign Transaction</h2>
-
-        {data.description && (
-          <div className="mb-4">
-            <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-            <p className="text-foreground">{data.description}</p>
-          </div>
-        )}
-
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Transaction</h3>
-          <div className="bg-secondary/50 p-4 rounded-md overflow-auto max-h-40 font-mono text-xs border border-border break-all">
-            {data.transaction}
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className="p-4 rounded-md mb-4">
-          <p className="text-destructive">{error}</p>
-        </div>
-      )}
-
-      <div className="flex justify-between mt-4 border-t border-border pt-4">
-        <Button variant="outline" onClick={handleReject} disabled={loading}>
-          {loading ? 'Rejecting...' : 'Reject'}
-        </Button>
-
-        <Button onClick={handleApprove} disabled={loading || !provider}>
-          {loading ? 'Signing...' : 'Sign Transaction'}
-        </Button>
+    <div className="flex h-screen flex-col justify-center items-center p-4">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-sm font-medium max-w-[240px] mx-auto">{statusMessage}</p>
       </div>
     </div>
   );

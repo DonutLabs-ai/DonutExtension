@@ -38,6 +38,7 @@ export default defineContentScript({
       const ui = await createShadowRootUi(ctx, {
         name: 'donut-extension-ui',
         position: 'overlay',
+        zIndex: 1000,
         anchor: 'body',
         mode: 'closed',
         onMount: container => {
