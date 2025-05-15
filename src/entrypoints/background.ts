@@ -1,8 +1,9 @@
 import { initBackgroundTransport } from '@/utils/transport';
-import { registerTokenService, startTokenServiceSchedulers } from '@/services/tokenService';
+import { registerTokenService } from '@/services/tokenService';
 import { registerSwapService } from '@/services/swapService';
 import { registerPopupEventService } from '@/services/popupEventService';
 import { registerMCPService } from '@/services/mcpService';
+import { registerAICompletionService } from '@/services/aiCompletionService';
 import { initStoreBackend } from '@/stores';
 
 export default {
@@ -18,8 +19,6 @@ export default {
     registerSwapService();
     registerPopupEventService();
     registerMCPService();
-
-    // Step 4: Start token service schedulers
-    startTokenServiceSchedulers();
+    registerAICompletionService();
   },
 };

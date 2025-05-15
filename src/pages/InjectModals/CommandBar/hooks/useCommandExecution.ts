@@ -3,6 +3,7 @@ import { useCommandInputStore } from '../store/commandInputStore';
 import { useToast } from '@/components/ToastProvider';
 import { getSwapService } from '@/services/swapService';
 import { getTokens } from '@/stores/tokenStore';
+import { useCommandHistoryStore } from '@/stores';
 
 /**
  * Custom hook for handling command execution and result display
@@ -11,7 +12,8 @@ export const useCommandExecution = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const toast = useToast();
 
-  const { parsedCommand, resetInput } = useCommandInputStore();
+  const { inputValue, parsedCommand, resetInput } = useCommandInputStore();
+  const { addRecord } = useCommandHistoryStore();
 
   function executeCommand(): Promise<{ success: boolean; message: string }> {
     return new Promise(resolve => {
@@ -54,6 +56,8 @@ export const useCommandExecution = () => {
                 amount,
               });
 
+              addRecord(inputValue, parsedCommand.commandId!);
+
               resolve({ success: true, message: `Swap submitted. Tx: ${sig}` });
             } catch (err: any) {
               resolve({ success: false, message: err?.message || 'Swap failed' });
@@ -77,6 +81,8 @@ export const useCommandExecution = () => {
                 resolve({ success: false, message: 'Token mint not found' });
                 return;
               }
+
+              addRecord(inputValue, parsedCommand.commandId!);
 
               resolve({ success: true, message: `Send submitted. Tx: ${'xxx'}` });
             } catch (err: any) {

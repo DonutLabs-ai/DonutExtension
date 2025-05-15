@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { cn } from '@/utils/shadcn';
 import { useCommandInputStore, SuggestionType } from '../../store/commandInputStore';
 import { COMMANDS } from '../../store/commandDefinitions';
 import { replaceTextRange } from '../../utils/commandParser';
 
-const CommandSuggestion: React.FC = () => {
+const CommandSuggestion = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { inputValue, setInputValue, setLastSelectionCursorPos, setActiveSuggestion } =
     useCommandInputStore();

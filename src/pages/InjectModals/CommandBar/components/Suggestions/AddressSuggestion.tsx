@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/utils/shadcn';
 import { useCommandInputStore } from '../../store/commandInputStore';
 import { getWordAtPosition } from '../../utils/commandParser';
@@ -25,14 +25,13 @@ const savedAddresses: SavedAddress[] = [
   },
 ];
 
-const AddressSuggestion: React.FC = () => {
+const AddressSuggestion = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const {
     inputValue,
     cursorPosition,
     setInputValue,
     setCursorPosition,
-    setActiveSuggestion,
     setParsedCommand,
     parsedCommand,
   } = useCommandInputStore();
@@ -61,7 +60,6 @@ const AddressSuggestion: React.FC = () => {
       parsedCommand,
       setInputValue,
       setCursorPosition,
-      setActiveSuggestion,
       setParsedCommand,
     });
   };

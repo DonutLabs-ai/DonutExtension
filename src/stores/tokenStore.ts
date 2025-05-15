@@ -12,7 +12,8 @@ export interface TokenInfo {
   logoURI: string;
   balance: string; // raw amount string from API
   uiBalance: number; // balance / 10 ** decimals
-  price: number; // USDC price
+  price: string; // USDC price
+  isUserDiscovered?: boolean; // flag for tokens discovered from user's wallet but not in official list
 }
 
 interface TokenStoreState {
@@ -25,7 +26,7 @@ interface TokenStoreState {
   // actions
   setTokens: (list: TokenInfo[]) => void;
   updateBalances: (map: Partial<Record<string, { balance: string; uiBalance: number }>>) => void;
-  updatePrices: (map: Partial<Record<string, number>>) => void;
+  updatePrices: (map: Partial<Record<string, string>>) => void;
 }
 
 // Create base zustand store
@@ -77,10 +78,10 @@ export const useTokenStore = create<TokenStoreState>(set => ({
       const updatedTokens = { ...state.tokens };
 
       Object.entries(priceMap).forEach(([mint, price]) => {
-        if (updatedTokens[mint] && typeof price === 'number') {
+        if (updatedTokens[mint]) {
           updatedTokens[mint] = {
             ...updatedTokens[mint],
-            price,
+            price: price ?? '0',
           };
         }
       });

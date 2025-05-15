@@ -14,8 +14,6 @@ interface SelectHandlerParams {
   setInputValue: (value: string) => void;
   // Function to set cursor position
   setCursorPosition: (position: number) => void;
-  // Function to set active suggestion type
-  setActiveSuggestion: (type: SuggestionType) => void;
   // Function to set parsed command
   setParsedCommand: (parsed: ParsedCommand | null) => void;
 }
@@ -30,7 +28,6 @@ export function handleSuggestionSelect({
   parsedCommand,
   setInputValue,
   setCursorPosition,
-  setActiveSuggestion,
   setParsedCommand,
 }: SelectHandlerParams): void {
   // Ensure we have a command

@@ -27,6 +27,7 @@ export default function MCPDemoPage() {
 
         // Get tools list
         const availableTools = await mcpService.getTools();
+        console.log('availableTools', availableTools);
         setTools(availableTools);
 
         // Set default selected tool (if any)

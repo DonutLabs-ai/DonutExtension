@@ -6,6 +6,7 @@ import {
   MCPResourceResult,
   MCPPromptResult,
 } from '@/utils/mcpClient';
+import { DONUT_MCP_SERVER_URL } from '@/constants/mcp';
 
 /**
  * MCP Service
@@ -15,7 +16,7 @@ class MCPService {
   private client: MCPClient | null = null;
   private connecting = false;
   private connectionPromise: Promise<void> | null = null;
-  private serverUrl: string | null = null;
+  private serverUrl: string | null = DONUT_MCP_SERVER_URL;
   private lastActivityTime: number = Date.now();
   private inactivityTimer: NodeJS.Timeout | null = null;
   private readonly INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -30,13 +31,13 @@ class MCPService {
    * @param serverUrl MCP server URL
    */
   async connect(serverUrl: string): Promise<void> {
-    // Save the server URL for potential reconnections
-    this.serverUrl = serverUrl;
-
     // If already connecting, return existing Promise
-    if (this.connecting && this.connectionPromise) {
+    if (this.serverUrl === serverUrl && this.connecting && this.connectionPromise) {
       return this.connectionPromise;
     }
+
+    // Save the server URL for potential reconnections
+    this.serverUrl = serverUrl;
 
     // If already connected, reset timer and return
     if (this.client?.isConnected()) {

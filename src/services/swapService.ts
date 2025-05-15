@@ -1,15 +1,15 @@
 import { defineProxyService } from '@webext-core/proxy-service';
-import { useSwapStore } from '@/stores/swapStore';
 import { useWalletStore } from '@/stores/walletStore';
 import { useTokenStore } from '@/stores/tokenStore';
 import { toRawAmount } from '@/utils/amount';
 import { getPopupEventService } from '@/services/popupEventService';
+import { getMCPService } from './mcpService';
 
 // ---- Constants ----
 const QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
 const SWAP_API = 'https://quote-api.jup.ag/v6/swap';
 
-const QUOTE_CACHE_TTL = 30_000; // 30s
+const QUOTE_CACHE_TTL = 8_000; // 8s
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 500; // ms
 
@@ -70,6 +70,16 @@ class SwapService {
     }
 
     try {
+      // const mcpService = getMCPService();
+      // const mcpQuote = await mcpService.callTool('GET_JUPITER_QUOTE', {
+      //   inputMint,
+      //   outputMint,
+      //   inputAmount: Number(amount),
+      // });
+      // const text = mcpQuote.content[0].text;
+      // if (!text) throw new Error('Failed to get quote');
+      // console.log('MCP Quote:', JSON.parse(text));
+
       const url = `${QUOTE_API}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}`;
       const res = await fetch(url);
 
@@ -110,6 +120,17 @@ class SwapService {
     });
 
     try {
+      // const mcpService = getMCPService();
+      // const mcpSwap = await mcpService.callTool('GET_JUPITER_UNSIGNED_SWAP', {
+      //   inputMint: quoteResponse.inputMint,
+      //   outputMint: quoteResponse.outputMint,
+      //   inputAmount: Number(quoteResponse.inAmount),
+      //   publicKey: userPublicKey,
+      // });
+      // const text = mcpSwap.content[0].text;
+      // if (!text) throw new Error('Failed to get swap');
+      // console.log('MCP Swap:', JSON.parse(text));
+
       const res = await fetch(SWAP_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -185,23 +206,7 @@ class SwapService {
       description,
     });
 
-    // Record the transaction in history
-    const record = {
-      id: Math.random().toString(36).slice(2),
-      timestamp: Date.now(),
-      inputMint: params.inputMint,
-      outputMint: params.outputMint,
-      amountIn: params.amount,
-      amountOut: quote.outAmount,
-      txSignature: signature,
-    } as const;
-    useSwapStore.getState().addRecord(record);
-
     return signature;
-  }
-
-  async getHistory() {
-    return useSwapStore.getState().history;
   }
 }
 

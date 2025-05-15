@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { cn } from '@/utils/shadcn';
+import { getTokenService } from '@/services/tokenService';
 import { useTokenStore } from '@/stores/tokenStore';
 import type { TokenInfo } from '@/stores/tokenStore';
 import { useCommandInputStore } from '../../store/commandInputStore';
@@ -10,11 +11,11 @@ interface TokenItem {
   symbol: string;
   name: string;
   logoURI?: string;
-  price: number;
+  price: string;
   balance: number;
 }
 
-const TokenSuggestion: React.FC = () => {
+const TokenSuggestion = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const tokensObj = useTokenStore(state => state.tokens);
   const tokens = useMemo<TokenItem[]>(
@@ -33,7 +34,6 @@ const TokenSuggestion: React.FC = () => {
     cursorPosition,
     setInputValue,
     setCursorPosition,
-    setActiveSuggestion,
     setParsedCommand,
     parsedCommand,
   } = useCommandInputStore();
@@ -48,7 +48,7 @@ const TokenSuggestion: React.FC = () => {
     if (tokens.length === 0) return [];
     // If current word is empty or only spaces, show first 50 tokens
     if (!currentWord.word || currentWord.word.trim() === '') {
-      return tokens.slice(0, 50);
+      return tokens;
     }
 
     const query = currentWord.word.toLowerCase();
@@ -58,7 +58,7 @@ const TokenSuggestion: React.FC = () => {
     );
 
     // If no matches found, return all tokens
-    return (filtered.length > 0 ? filtered : tokens).slice(0, 50);
+    return filtered.length > 0 ? filtered : tokens;
   }, [currentWord, tokens]);
 
   // Handle token selection - using the generic handler function
@@ -71,19 +71,10 @@ const TokenSuggestion: React.FC = () => {
         parsedCommand,
         setInputValue,
         setCursorPosition,
-        setActiveSuggestion,
         setParsedCommand,
       });
     },
-    [
-      inputValue,
-      cursorPosition,
-      parsedCommand,
-      setInputValue,
-      setCursorPosition,
-      setActiveSuggestion,
-      setParsedCommand,
-    ]
+    [inputValue, cursorPosition, parsedCommand, setInputValue, setCursorPosition, setParsedCommand]
   );
 
   // Add keyboard navigation listener once
@@ -119,6 +110,21 @@ const TokenSuggestion: React.FC = () => {
   useEffect(() => {
     return () => {
       setActiveIndex(0);
+    };
+  }, []);
+
+  // auto refresh token list price and balance
+  useEffect(() => {
+    const tokenService = getTokenService();
+    const refreshTokenData = async () => {
+      await tokenService.refreshBalances();
+      await tokenService.refreshPrices();
+    };
+    refreshTokenData();
+
+    const interval = setInterval(refreshTokenData, 10000);
+    return () => {
+      clearInterval(interval);
     };
   }, []);
 
