@@ -28,8 +28,6 @@ const CommandPreview: React.FC<CommandPreviewProps> = ({
 
   return (
     <div className={cn('w-full px-5 py-3', className)}>
-      <div className="text-sm font-medium text-foreground mb-3">Transaction Preview</div>
-
       {parsedCommand.commandId === 'swap' && (
         <SwapPreview
           parsedCommand={parsedCommand}

@@ -40,8 +40,9 @@ const InputField: React.FC<InputFieldProps> = ({ className }) => {
 
   // Fetch AI suggestion when input changes with debouncing
   useEffect(() => {
+    const commandId = parsedCommand?.commandId;
     // If the input is empty or the command is not recognized, reset the state
-    if (!inputValue || !isCommandRecognized()) {
+    if (!inputValue || !commandId || !isCommandRecognized()) {
       setAiSuggestion('');
       return;
     }
@@ -59,21 +60,20 @@ const InputField: React.FC<InputFieldProps> = ({ className }) => {
     // Set a new timeout
     timeoutRef.current = setTimeout(() => {
       getAICompletionService()
-        .getSuggestion(inputValue, parsedCommand!.commandId!)
+        .getSuggestion(inputValue, commandId)
         .then(result => setAiSuggestion(result))
         .catch(error => {
           console.error('Error getting AI suggestion:', error);
           setAiSuggestion('');
         });
     }, 300); // 300ms debounce delay
-
-    // Cleanup function to clear timeout on unmount or re-render
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [inputValue, parsedCommand, aiSuggestion, inputMatchesSuggestion, isCommandRecognized]);
+  }, [
+    inputValue,
+    parsedCommand?.commandId,
+    aiSuggestion,
+    inputMatchesSuggestion,
+    isCommandRecognized,
+  ]);
 
   // Process suggestion display
   const processSuggestion = useMemo(() => {

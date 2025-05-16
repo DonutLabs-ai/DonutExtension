@@ -2,6 +2,7 @@ import { defineConfig } from 'wxt';
 import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import svgr from 'vite-plugin-svgr';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -13,6 +14,7 @@ export default defineConfig({
   },
   vite: () => ({
     plugins: [
+      svgr(),
       tailwindcss(),
       nodePolyfills({
         globals: {

@@ -5,7 +5,11 @@ const AI_COMPLETION_URL =
   'https://donut-extension-ai-jackjuns-projects.vercel.app/api/ai/command/complete';
 
 class AICompletionService {
-  public async getSuggestion(inputValue: string, commandType: string): Promise<string> {
+  public async getSuggestion(
+    inputValue: string,
+    commandType: string,
+    returnFullCommand = true
+  ): Promise<string> {
     if (!inputValue || !commandType) return '';
 
     const { address } = useWalletStore.getState();
@@ -33,11 +37,18 @@ class AICompletionService {
     try {
       const response = await fetchBase<{ command: string }>(AI_COMPLETION_URL, {
         method: 'POST',
-        body: JSON.stringify({ inputValue, address, history, balance, trending }),
+        body: JSON.stringify({
+          inputValue,
+          address,
+          history,
+          balance,
+          trending,
+          returnFullCommand,
+        }),
       });
 
       if (!response.command) return '';
-      return inputValue + response.command;
+      return returnFullCommand ? response.command : inputValue + response.command;
     } catch (error) {
       console.error('Error getting AI suggestion:', error);
       return '';

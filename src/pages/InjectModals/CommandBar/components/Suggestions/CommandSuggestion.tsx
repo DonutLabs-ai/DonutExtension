@@ -138,7 +138,7 @@ const CommandSuggestion = () => {
           className={cn(
             'w-full px-3 py-2.5 rounded-lg font-medium cursor-pointer transition-all duration-150',
             'flex items-center',
-            index === activeIndex ? 'bg-accent' : 'bg-background'
+            index === activeIndex && 'bg-accent'
           )}
           onMouseEnter={() => setActiveIndex(index)}
           onClick={() => handleCommandSelect(command.id)}

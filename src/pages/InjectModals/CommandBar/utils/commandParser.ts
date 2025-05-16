@@ -156,26 +156,12 @@ function parseCommandParams(
   const wordPositions = collectWordPositions(text, words, currentWordStart);
 
   // Process different parameter types sequentially
-  assignParameters(
-    ParamType.Amount,
-    command,
-    params,
-    wordPositions,
-    cursorPosition,
-    currentParamId
-  );
-  assignParameters(ParamType.Token, command, params, wordPositions, cursorPosition, currentParamId);
-  assignParameters(
-    ParamType.Address,
-    command,
-    params,
-    wordPositions,
-    cursorPosition,
-    currentParamId
-  );
+  assignParameters(ParamType.Amount, command, params, wordPositions);
+  assignParameters(ParamType.Token, command, params, wordPositions);
+  assignParameters(ParamType.Address, command, params, wordPositions);
 
   // Process remaining unassigned parameters
-  assignRemainingParameters(command, params, wordPositions, cursorPosition, currentParamId);
+  assignRemainingParameters(command, params, wordPositions);
 
   // Process cursor parameter logic
   currentParamId = findCursorParam(
@@ -227,9 +213,7 @@ function assignParameters(
   paramType: ParamType,
   command: CommandDefinition,
   params: Record<string, ParsedParam>,
-  wordPositions: { word: string; startPos: number; endPos: number }[],
-  cursorPosition: number,
-  currentParamId: string | null
+  wordPositions: { word: string; startPos: number; endPos: number }[]
 ): void {
   const iterable =
     paramType === ParamType.Token
@@ -262,11 +246,6 @@ function assignParameters(
           endPos: wordPos.endPos,
           complete: isComplete,
         };
-
-        // Check if cursor is within this word
-        if (cursorPosition >= wordPos.startPos && cursorPosition <= wordPos.endPos) {
-          currentParamId = typeParam.id;
-        }
       }
     }
   }
@@ -278,9 +257,7 @@ function assignParameters(
 function assignRemainingParameters(
   command: CommandDefinition,
   params: Record<string, ParsedParam>,
-  wordPositions: { word: string; startPos: number; endPos: number }[],
-  cursorPosition: number,
-  currentParamId: string | null
+  wordPositions: { word: string; startPos: number; endPos: number }[]
 ): void {
   for (const wordPos of wordPositions) {
     const { word } = wordPos;
@@ -301,11 +278,6 @@ function assignRemainingParameters(
         endPos: wordPos.endPos,
         complete: isComplete,
       };
-
-      // Check if cursor is within this word
-      if (cursorPosition >= wordPos.startPos && cursorPosition <= wordPos.endPos) {
-        currentParamId = availableParam.id;
-      }
     }
   }
 }

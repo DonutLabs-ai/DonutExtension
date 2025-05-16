@@ -3,6 +3,8 @@ import { cn } from '@/utils/shadcn';
 import { getTokenService } from '@/services/tokenService';
 import { useTokenStore } from '@/stores/tokenStore';
 import type { TokenInfo } from '@/stores/tokenStore';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/shadcn/avatar';
+import { numberIndent } from '@/utils/amount';
 import { useCommandInputStore } from '../../store/commandInputStore';
 import { getWordAtPosition } from '../../utils/commandParser';
 import { handleSuggestionSelect } from '../../utils/handleSuggestionSelect';
@@ -144,38 +146,32 @@ const TokenSuggestion = () => {
           <div
             key={token.symbol}
             className={cn(
-              'px-3 py-2 rounded-lg cursor-pointer transition-colors duration-150',
-              'flex items-center justify-between',
-              activeIndex === index ? 'bg-accent' : 'bg-background'
+              'px-3 py-2 rounded-lg cursor-pointer transition-colors duration-150 border border-border',
+              'flex items-center gap-2 overflow-hidden',
+              activeIndex === index && 'bg-accent'
             )}
             onMouseEnter={() => setActiveIndex(index)}
             onClick={() => handleTokenSelect(token.symbol)}
           >
-            <div className="flex items-center gap-2">
-              {token.logoURI ? (
-                <img
-                  src={token.logoURI}
-                  alt={token.symbol}
-                  className="w-6 h-6 rounded-full object-contain"
-                />
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs">
-                  {token.symbol.charAt(0)}
-                </div>
-              )}
-              <div className="flex flex-col">
-                <span className="font-medium leading-none">{token.symbol}</span>
-                <span className="text-xs text-muted-foreground leading-none">{token.name}</span>
+            <Avatar className="w-6 h-6">
+              <AvatarImage src={token.logoURI} alt={token.symbol} />
+              <AvatarFallback>{token.symbol.charAt(0)}</AvatarFallback>
+            </Avatar>
+
+            <div className="flex flex-col space-y-1 flex-1 overflow-hidden">
+              <div className="truncate text-accent-foreground">{token.symbol}</div>
+              <div className="truncate text-xs text-muted-foreground leading-none">
+                {token.name}
               </div>
             </div>
 
-            <div className="flex flex-col items-end">
-              <span className="text-xs font-medium">
-                {token.balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                ${Number(token.price || 0).toFixed(2)}
-              </span>
+            <div className="flex flex-col items-end space-y-1">
+              <div className="text-accent-foreground">
+                {numberIndent(token.balance, { digits: 2 })}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                ${numberIndent(token.price, { digits: 2 })}
+              </div>
             </div>
           </div>
         ))}

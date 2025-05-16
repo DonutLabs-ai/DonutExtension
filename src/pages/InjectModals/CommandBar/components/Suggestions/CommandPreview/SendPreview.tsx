@@ -27,10 +27,10 @@ const SendPreview: React.FC<SendPreviewProps> = ({
 
   // Simulated transaction fee
   const transactionFee = 0.001;
-  const usdValue = token === 'SOL' ? 118.62 * parseFloat(amount) : 0;
 
   return (
-    <div className="bg-background rounded-lg">
+    <div>
+      <div className="text-sm font-medium text-foreground mb-3">Send Preview</div>
       {/* Transaction area */}
       <div className="flex items-center justify-between mb-4">
         {/* Sending area */}
@@ -93,23 +93,6 @@ const SendPreview: React.FC<SendPreviewProps> = ({
           <span className="text-muted-foreground">Transaction Fee</span>
           <span className="text-foreground">{transactionFee} SOL</span>
         </div>
-        {token === 'SOL' && usdValue > 0 && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">USD Value</span>
-            <span className="text-foreground">${usdValue.toFixed(2)}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Confirm button */}
-      <div>
-        <button
-          onClick={executeCommand}
-          disabled={isExecuting}
-          className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium transition-colors duration-200 hover:bg-primary/90 disabled:bg-primary/50 disabled:cursor-not-allowed"
-        >
-          {isExecuting ? 'Processing...' : 'Confirm Send'}
-        </button>
       </div>
     </div>
   );
