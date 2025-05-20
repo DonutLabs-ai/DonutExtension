@@ -45,7 +45,7 @@ const CommandPreview: React.FC<CommandPreviewProps> = ({
       )}
 
       {parsedCommand.commandId !== 'swap' && parsedCommand.commandId !== 'send' && (
-        <div className="p-4 bg-muted rounded-lg text-center text-muted-foreground">
+        <div className="p-4 rounded-lg text-center">
           Preview not supported for this command type
         </div>
       )}

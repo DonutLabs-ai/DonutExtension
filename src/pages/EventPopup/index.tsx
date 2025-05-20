@@ -40,9 +40,6 @@ const EventPopup: React.FC = () => {
       }
     }
 
-    console.log('Searching for event ID:', eventId);
-    console.log('Current location:', location);
-
     if (!eventId) {
       setError('No event ID provided');
       setLoading(false);
@@ -51,7 +48,6 @@ const EventPopup: React.FC = () => {
 
     // Find the active event
     const events = usePopupEventStore.getState().events;
-    console.log('Available events:', events);
 
     const activeEvent = events.find(e => e.id === eventId);
 

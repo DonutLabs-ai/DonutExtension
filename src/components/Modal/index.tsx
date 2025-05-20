@@ -80,7 +80,7 @@ const Modal: React.FC<ModalProps> = ({
       {/* Overlay */}
       <div
         ref={overlayRef}
-        className={cn('fixed inset-0 bg-black/50 transition-opacity', overlayClassName)}
+        className={cn('fixed inset-0 transition-opacity', overlayClassName)}
         onClick={onClose}
       />
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import hotkeys from 'hotkeys-js';
-import CommandBar from './CommandBar';
+import CommandBar from './TiptapCommandBar';
 import { ToastProvider } from '@/components/ToastProvider';
 
 const InjectModals = () => {
