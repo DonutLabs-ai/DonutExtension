@@ -3,6 +3,8 @@
  * Contains ProseMirror DOM operations and editor helper functions
  */
 
+import type { Node as ProseMirrorNode } from 'prosemirror-model';
+
 // Define style cache to reduce the cost of repeated style settings
 const hiddenElementStyle = {
   display: 'none',
@@ -146,4 +148,20 @@ export function addDOMObserver(editor: any, callback: () => void): () => void {
     if (observer) observer.disconnect();
     if (debounceTimer) clearTimeout(debounceTimer);
   };
+}
+
+/**
+ * Get the "visual equivalent content" of the doc, the text node takes the text, and the tokenNode takes the symbol.
+ */
+export function getDocVisualContent(doc: ProseMirrorNode): string {
+  let result = '';
+  doc.descendants(node => {
+    if (node.isText) {
+      result += node.text;
+    } else if (node.type && node.type.name === 'tokenNode' && node.attrs?.symbol) {
+      result += node.attrs.symbol;
+    }
+    return true;
+  });
+  return result;
 }

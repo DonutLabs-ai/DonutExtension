@@ -4,6 +4,7 @@ import { getShadowRootContainer } from '@/entrypoints/content';
 import TiptapEditor from './components/TiptapEditor';
 import Suggestion from './components/suggestions';
 import { useTiptapCommandBarStore, SuggestionType } from './store/tiptapStore';
+import Logo from '@/assets/images/logo.svg?react';
 
 interface TiptapCommandBarProps {
   isOpen: boolean;
@@ -41,8 +42,11 @@ const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) 
         }}
       >
         <div className="bg-background rounded-[44px] overflow-hidden">
-          <div className="py-6 px-7">
-            <TiptapEditor />
+          <div className="py-6 px-7 flex gap-2">
+            <Logo className="w-10 h-10 text-foreground" />
+            <div className="w-[calc(100%-48px)] mt-[6px]">
+              <TiptapEditor className="w-full" />
+            </div>
           </div>
 
           {shouldShowSuggestions && <Suggestion />}

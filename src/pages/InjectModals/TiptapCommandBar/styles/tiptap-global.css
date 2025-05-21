@@ -1,8 +1,8 @@
 /* Base Tiptap styles */
 .ProseMirror {
   outline: none;
-  font-size: 1.125rem;
-  line-height: 1.75rem;
+  font-size: 20px !important;
+  line-height: 28px !important;
   caret-color: var(--foreground);
   color: var(--foreground);
 
@@ -30,17 +30,7 @@
 }
 
 .ProseMirror-trailingBreak {
-  display: inline !important;
-  height: 0 !important;
-  width: 0 !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  user-select: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: none !important;
-  outline: none !important;
-  font-size: 0 !important;
+  display: none;
 }
 
 /* 确保TokenNode后不会出现额外空格或换行 */
@@ -68,12 +58,13 @@
 }
 
 /* Placeholder styles */
-.is-editor-empty:first-child::before {
+.ProseMirror.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
   color: var(--muted-foreground);
   pointer-events: none;
   height: 0;
+  font-style: italic;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
@@ -155,10 +146,10 @@
 
 /* Token Node 样式 */
 .token-view-wrapper {
-  display: inline-block;
-  white-space: nowrap;
-  user-select: all;
-  cursor: default;
+  display: inline-block !important;
+  white-space: nowrap !important;
+  user-select: all !important;
+  cursor: default !important;
 }
 
 .token-view {
@@ -166,19 +157,37 @@
   align-items: center;
   background-color: var(--card) !important;
   border-radius: 999px !important;
-  padding: 4px 8px !important;
+  height: 28px !important;
+  padding: 0 8px !important;
   margin: 0 1px !important;
-  gap: 0.25rem;
+  gap: 4px !important;
   border: none !important;
 }
 
 .token-avatar {
-  width: 1rem;
-  height: 1rem;
-  font-size: 0.625rem;
+  width: 20px !important;
+  height: 20px !important;
 }
 
 .token-symbol {
-  font-weight: 500;
-  color: var(--primary);
+  font-size: 20px !important;
+  font-weight: 600;
+  color: var(--foreground) !important;
+}
+
+/* Suffix hint style */
+.suffix-hint {
+  color: var(--muted-foreground);
+  pointer-events: none !important;
+  user-select: none !important;
+  display: inline !important;
+  font-style: italic !important;
+  white-space: normal !important;
+  word-break: break-all !important;
+  overflow-wrap: anywhere !important;
+}
+
+/* Add a pseudo-element to display the hint text */
+.suffix-hint::after {
+  content: attr(data-text);
 }

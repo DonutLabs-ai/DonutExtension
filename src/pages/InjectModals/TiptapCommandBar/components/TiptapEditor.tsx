@@ -8,6 +8,7 @@ import { TokenNode } from '../extensions/TokenNode';
 import { TokenReplacer } from '../extensions/TokenReplacer';
 import { SpaceTransformer } from '../extensions/SpaceTransformer';
 import { DisableEnter, FixTrailingNodesExtension } from '../extensions/EditorExtensions';
+import { SuffixHint } from '../extensions/SuffixHint';
 import {
   removeTrailingNodesWithEditor,
   maintainCursorPosition,
@@ -17,6 +18,7 @@ import useTiptapCommandExecution from '../hooks/useTiptapCommandExecution';
 import { useCommandParser } from '../hooks/useCommandParser';
 import { useTokenNodeHandler } from '../hooks/useTokenNodeHandler';
 import { useSuggestionHandler } from '../hooks/useSuggestionHandler';
+import { useAiSuggestion } from '../hooks/useAiSuggestion';
 import '../styles/tiptap-global.css';
 
 interface TiptapEditorProps {
@@ -32,12 +34,14 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
     reset: resetStore,
     content,
     setEditor,
+    aiSuggestion,
   } = useTiptapCommandBarStore();
 
   const { executeCurrentCommand } = useTiptapCommandExecution();
   const { parseCommand } = useCommandParser();
   const { processTokenNodes, calculateNextParamNeedingSuggestion } = useTokenNodeHandler();
   const { determineSuggestionType } = useSuggestionHandler();
+  const { applySuggestion } = useAiSuggestion();
 
   /**
    * Handler for command updates
@@ -142,6 +146,11 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
         placeholder: 'Type / to start a command...',
         emptyEditorClass: 'is-editor-empty',
       }),
+      SuffixHint.configure({
+        text: '',
+        class: 'suffix-hint',
+        enabled: true,
+      }),
       DisableEnter,
       TokenNode.configure({
         HTMLAttributes: {
@@ -159,6 +168,13 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
       },
       // Handle key presses
       handleKeyDown: (view, event) => {
+        // Handle Tab key for accepting AI suggestion
+        if (event.key === 'Tab' && !event.shiftKey && aiSuggestion) {
+          event.preventDefault();
+          applySuggestion();
+          return true;
+        }
+
         // Show command menu when slash is typed
         if (event.key === '/') {
           updateMultipleStates({

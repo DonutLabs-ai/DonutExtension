@@ -33,6 +33,9 @@ interface TiptapCommandBarState {
   parameters: Record<string, any>;
   editor: Editor | null;
 
+  // AI suggestion state
+  aiSuggestion: string;
+
   // Actions
   setContent: (content: string) => void;
   setActiveSuggestion: (type: SuggestionType) => void;
@@ -41,6 +44,7 @@ interface TiptapCommandBarState {
   setLastSelectionCursorPos: (position: number) => void;
   setParameter: (key: string, value: any) => void;
   setEditor: (editor: Editor | null) => void;
+  setAiSuggestion: (suggestion: string) => void;
   updateMultipleStates: (updates: Partial<TiptapCommandBarState>) => void;
   reset: () => void;
 }
@@ -54,6 +58,7 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
   lastSelectionCursorPos: 0,
   parameters: {},
   editor: null,
+  aiSuggestion: '',
 
   // Actions
   setContent: content => set({ content }),
@@ -81,15 +86,9 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
 
   setEditor: editor => set({ editor }),
 
-  /**
-   * Update multiple state values at once
-   * Use this to batch updates and reduce re-renders
-   */
-  updateMultipleStates: updates =>
-    set(state => ({
-      ...state,
-      ...updates,
-    })),
+  setAiSuggestion: suggestion => set({ aiSuggestion: suggestion }),
+
+  updateMultipleStates: updates => set(state => ({ ...state, ...updates })),
 
   reset: () =>
     set({
@@ -99,6 +98,6 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
       parsedCommand: null,
       lastSelectionCursorPos: 0,
       parameters: {},
-      editor: null,
+      aiSuggestion: '',
     }),
 }));

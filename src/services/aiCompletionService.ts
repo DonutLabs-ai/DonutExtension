@@ -47,8 +47,7 @@ class AICompletionService {
         }),
       });
 
-      if (!response.command) return '';
-      return returnFullCommand ? response.command : inputValue + response.command;
+      return response.command || '';
     } catch (error) {
       console.error('Error getting AI suggestion:', error);
       return '';
