@@ -14,7 +14,7 @@ const Suggestion: React.FC = () => {
   }
 
   return (
-    <ScrollArea className="w-full max-h-60 flex flex-col border-t border-border">
+    <ScrollArea className="w-full max-h-72 flex flex-col border-t border-border">
       {activeSuggestion === SuggestionType.Command && <CommandSuggestion />}
       {activeSuggestion === SuggestionType.Token && <TokenSuggestion />}
       {activeSuggestion === SuggestionType.Address && <AddressSuggestion />}

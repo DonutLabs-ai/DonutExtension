@@ -57,7 +57,8 @@ const TokenSuggestion = () => {
 
     // Find all Token type parameters
     const tokenParams = extendedCommand.command.params.filter(
-      (param: CommandParamType) => param.type === ParamType.Token && param.required
+      (param: CommandParamType) =>
+        [ParamType.Token, ParamType.TokenAddress].includes(param.type) && param.required
     );
 
     if (tokenParams.length === 0) {

@@ -32,15 +32,16 @@ export function assignParametersByType(
   const availableWordPositions: (WordPosition | undefined)[] = [...wordPositions];
 
   // Define type priority order
-  const typeOrder = [ParamType.Amount, ParamType.Token, ParamType.Address, ParamType.Text];
+  const typeOrder = Object.values(ParamType);
 
   // Create parameter mapping grouped by type
-  const paramsByType: Record<ParamType, (typeof command.params)[0][]> = {
-    [ParamType.Amount]: [],
-    [ParamType.Token]: [],
-    [ParamType.Address]: [],
-    [ParamType.Text]: [],
-  };
+  const paramsByType = typeOrder.reduce(
+    (acc, type) => {
+      acc[type] = [];
+      return acc;
+    },
+    {} as Record<ParamType, (typeof command.params)[0][]>
+  );
 
   // Group parameters by type
   for (const param of command.params) {

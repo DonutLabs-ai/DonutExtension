@@ -1,4 +1,4 @@
-import { commands, CommandOption } from './commandData';
+import { commands, CommandOption, CommandIdType } from './commandData';
 
 /**
  * Word position interface, represents position of a word in text
@@ -25,7 +25,7 @@ export interface ParsedParameter {
  */
 export interface ParsedCommand {
   startsWithSlash: boolean;
-  commandId?: string;
+  commandId?: CommandIdType;
   command?: CommandOption;
   isComplete?: boolean;
   parameters?: Record<string, string>;
@@ -33,13 +33,6 @@ export interface ParsedCommand {
   commandConfirmed?: boolean;
   cursorParamId?: string | null;
   nextParamNeedingSuggestionId?: string | null;
-}
-
-// TokenInfo interface definition, to avoid import errors
-interface TokenInfo {
-  symbol: string;
-  mint: string;
-  [key: string]: any;
 }
 
 /**

@@ -14,7 +14,7 @@ import {
   maintainCursorPosition,
   addDOMObserver,
 } from '../utils/editorUtils';
-import useTiptapCommandExecution from '../hooks/useTiptapCommandExecution';
+import useCommandExecution from '../hooks/useCommandExecution';
 import { useCommandParser } from '../hooks/useCommandParser';
 import { useTokenNodeHandler } from '../hooks/useTokenNodeHandler';
 import { useSuggestionHandler } from '../hooks/useSuggestionHandler';
@@ -37,7 +37,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
     aiSuggestion,
   } = useTiptapCommandBarStore();
 
-  const { executeCurrentCommand } = useTiptapCommandExecution();
+  const { executeCurrentCommand } = useCommandExecution();
   const { parseCommand } = useCommandParser();
   const { processTokenNodes, calculateNextParamNeedingSuggestion } = useTokenNodeHandler();
   const { determineSuggestionType } = useSuggestionHandler();

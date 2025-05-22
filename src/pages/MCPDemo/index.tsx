@@ -196,9 +196,9 @@ export default function MCPDemoPage() {
               <div key={key} className="space-y-1">
                 <label className="block text-sm font-medium">
                   {key}
-                  {required && <span className="text-red-500">*</span>}
+                  {required && <span className="text-destructive">*</span>}
                   {prop.description && (
-                    <span className="ml-2 text-xs text-gray-500">{prop.description}</span>
+                    <span className="ml-2 text-xs text-muted-foreground">{prop.description}</span>
                   )}
                 </label>
 
@@ -259,7 +259,7 @@ export default function MCPDemoPage() {
     if (!result) return null;
 
     return (
-      <div className="mt-6 p-4 bg-gray-100 rounded">
+      <div className="mt-6 p-4 bg-accent rounded">
         <h3 className="text-lg font-medium mb-2">Result</h3>
         {result.content.map((item, index) => {
           if (item.type === 'text') {
@@ -306,26 +306,26 @@ export default function MCPDemoPage() {
           {!isConnected && connectionAttempted && (
             <button
               onClick={handleRetryConnection}
-              className="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-xs"
+              className="px-2 py-1 bg-accent text-foreground hover:bg-foreground/80 rounded text-xs"
               disabled={isLoading}
             >
               Retry
             </button>
           )}
         </div>
-        <div className="text-sm text-gray-600 truncate" title={DONUT_MCP_SERVER_URL}>
+        <div className="text-sm text-foreground truncate" title={DONUT_MCP_SERVER_URL}>
           Server: {DONUT_MCP_SERVER_URL}
         </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-100 border border-red-400 rounded text-red-700 text-sm">
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive rounded text-destructive text-sm">
           {error}
         </div>
       )}
 
       {isLoading && (
-        <div className="mb-4 p-3 bg-blue-100 border border-blue-400 rounded text-sm">
+        <div className="mb-4 p-3 bg-foreground/10 border border-foreground rounded text-sm">
           Loading...
         </div>
       )}
@@ -337,7 +337,7 @@ export default function MCPDemoPage() {
               <h3 className="text-lg font-medium">Available Tools</h3>
               <button
                 onClick={handleRefreshTools}
-                className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                className="px-2 py-1 bg-foreground hover:bg-accent/80 rounded text-sm"
                 disabled={isLoading}
               >
                 Refresh
@@ -345,7 +345,7 @@ export default function MCPDemoPage() {
             </div>
 
             {tools.length === 0 ? (
-              <p className="text-gray-500 italic">No available tools</p>
+              <p className="text-foreground italic">No available tools</p>
             ) : (
               <select
                 className="w-full border rounded p-2"

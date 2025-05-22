@@ -2,11 +2,19 @@ import jupiter from '@/assets/images/jupiter.png';
 import solsniffer from '@/assets/images/solsniffer.png';
 import logo from '@/assets/images/logo.png';
 
+export enum CommandIdType {
+  Swap = 'swap',
+  Send = 'send',
+  Chart = 'chart',
+  RugCheck = 'rugCheck',
+}
+
 export enum ParamType {
   Amount = 'amount',
   Token = 'token',
   Address = 'address',
   Text = 'text',
+  TokenAddress = 'tokenAddress',
 }
 
 export interface CommandParam {
@@ -18,22 +26,20 @@ export interface CommandParam {
 }
 
 export interface CommandOption {
-  id: string;
+  id: CommandIdType;
   icon: string;
   title: string;
   description?: string;
-  category?: string;
   shortcut?: string;
   params: CommandParam[];
 }
 
 export const commands: CommandOption[] = [
   {
-    id: 'swap',
+    id: CommandIdType.Swap,
     icon: jupiter,
     title: 'Swap',
     description: 'Swap token on Jupiter',
-    category: 'transaction',
     params: [
       {
         id: 'amount',
@@ -59,11 +65,10 @@ export const commands: CommandOption[] = [
     ],
   },
   {
-    id: 'send',
+    id: CommandIdType.Send,
     icon: logo,
     title: 'Send',
     description: 'Send tokens to an address',
-    category: 'transaction',
     params: [
       {
         id: 'amount',
@@ -85,6 +90,36 @@ export const commands: CommandOption[] = [
         type: ParamType.Address,
         required: true,
         placeholder: 'Recipient address',
+      },
+    ],
+  },
+  {
+    id: CommandIdType.Chart,
+    icon: logo,
+    title: 'Chart',
+    description: 'Show a price chart',
+    params: [
+      {
+        id: 'token',
+        name: 'Token',
+        type: ParamType.TokenAddress,
+        required: true,
+        placeholder: 'Token to chart',
+      },
+    ],
+  },
+  {
+    id: CommandIdType.RugCheck,
+    icon: solsniffer,
+    title: 'RugCheck',
+    description: 'Analyze sol token on Solsniffer',
+    params: [
+      {
+        id: 'token',
+        name: 'Token',
+        type: ParamType.TokenAddress,
+        required: true,
+        placeholder: 'Token address',
       },
     ],
   },

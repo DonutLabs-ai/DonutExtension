@@ -1,6 +1,9 @@
 import SwapPreview from './SwapPreview';
 import SendPreview from './SendPreview';
+import RugCheck from './RugCheck';
+import PriceChart from './PriceChart';
 import { useTiptapCommandBarStore } from '../../../store/tiptapStore';
+import { CommandIdType } from '../../../utils/commandData';
 
 const CommandPreview = () => {
   const { parsedCommand } = useTiptapCommandBarStore();
@@ -12,14 +15,20 @@ const CommandPreview = () => {
 
   return (
     <div className="w-full py-6 px-[30px] text-foreground">
-      {parsedCommand.commandId === 'swap' && <SwapPreview parsedCommand={parsedCommand} />}
+      {parsedCommand.commandId === CommandIdType.Swap && (
+        <SwapPreview parsedCommand={parsedCommand} />
+      )}
 
-      {parsedCommand.commandId === 'send' && <SendPreview parsedCommand={parsedCommand} />}
+      {parsedCommand.commandId === CommandIdType.Send && (
+        <SendPreview parsedCommand={parsedCommand} />
+      )}
 
-      {parsedCommand.commandId !== 'swap' && parsedCommand.commandId !== 'send' && (
-        <div className="p-4 rounded-lg text-center">
-          Preview not supported for this command type
-        </div>
+      {parsedCommand.commandId === CommandIdType.RugCheck && (
+        <RugCheck parsedCommand={parsedCommand} />
+      )}
+
+      {parsedCommand.commandId === CommandIdType.Chart && (
+        <PriceChart parsedCommand={parsedCommand} />
       )}
     </div>
   );

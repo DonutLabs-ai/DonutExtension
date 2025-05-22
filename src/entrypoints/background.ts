@@ -4,6 +4,7 @@ import { registerSwapService } from '@/services/swapService';
 import { registerPopupEventService } from '@/services/popupEventService';
 import { registerMCPService } from '@/services/mcpService';
 import { registerAICompletionService } from '@/services/aiCompletionService';
+import { registerCoinGeckoService } from '@/services/coinGeckoService';
 import { initStoreBackend } from '@/stores';
 
 export default {
@@ -20,5 +21,6 @@ export default {
     registerPopupEventService();
     registerMCPService();
     registerAICompletionService();
+    registerCoinGeckoService();
   },
 };

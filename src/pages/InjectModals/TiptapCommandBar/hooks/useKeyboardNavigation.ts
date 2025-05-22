@@ -2,61 +2,61 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 interface KeyboardNavigationOptions<T> {
   /**
-   * 导航的项目列表
+   * List of items for navigation
    */
   items: T[];
 
   /**
-   * 选择当前项的回调函数
+   * Callback function for selecting the current item
    */
   onSelect: (item: T) => void;
 
   /**
-   * 是否启用键盘导航 (默认: true)
+   * Whether keyboard navigation is enabled (default: true)
    */
   isEnabled?: boolean;
 
   /**
-   * 处理的按键列表 (默认: ['ArrowUp', 'ArrowDown', 'Enter'])
+   * List of keys to handle (default: ['ArrowUp', 'ArrowDown', 'Enter'])
    */
   keys?: string[];
 
   /**
-   * 初始索引 (默认: 0)
+   * Initial index (default: 0)
    */
   initialIndex?: number;
 
   /**
-   * 当项目列表变化时是否重置索引 (默认: false)
+   * Whether to reset the index when the item list changes (default: false)
    */
   resetOnItemsChange?: boolean;
 }
 
 interface KeyboardNavigationResult<T> {
   /**
-   * 当前活动项的索引
+   * Index of the currently active item
    */
   activeIndex: number;
 
   /**
-   * 设置活动索引的函数
+   * Function to set the active index
    */
   setActiveIndex: (index: number) => void;
 
   /**
-   * 键盘事件处理函数，可选用于手动处理键盘事件
+   * Keyboard event handler function, optionally used for manually handling keyboard events
    */
   handleKeyDown: (e: KeyboardEvent) => void;
 
   /**
-   * 当前活动项
+   * Currently active item
    */
   activeItem: T | undefined;
 }
 
 /**
- * 自定义钩子用于处理列表的键盘导航
- * 支持上下方向键导航和回车键选择，内部管理活动索引状态
+ * Custom hook for handling keyboard navigation in lists
+ * Supports navigation with up/down arrow keys and selection with Enter key, internally manages active index state
  */
 export function useKeyboardNavigation<T>({
   items,
@@ -69,28 +69,28 @@ export function useKeyboardNavigation<T>({
   const [activeIndex, setActiveIndex] = useState(initialIndex);
   const prevItemsLengthRef = useRef(items.length);
 
-  // 在项目列表长度变化时检查边界并根据设置重置索引
+  // Check boundaries and reset index based on settings when item list length changes
   useEffect(() => {
     if (items.length === 0) {
       return;
     }
 
-    // 检查数组长度是否变化
+    // Check if array length has changed
     if (prevItemsLengthRef.current !== items.length) {
-      // 长度变化时根据策略设置索引
+      // Set index according to strategy when length changes
       if (resetOnItemsChange) {
         setActiveIndex(0);
       } else if (activeIndex >= items.length) {
-        // 仅当当前索引超出新数组范围时才重置
+        // Only reset when current index is beyond the new array range
         setActiveIndex(Math.max(0, items.length - 1));
       }
 
-      // 更新长度引用
+      // Update length reference
       prevItemsLengthRef.current = items.length;
     }
   }, [items.length, activeIndex, resetOnItemsChange]);
 
-  // 处理键盘事件
+  // Handle keyboard events
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (!isEnabled || items.length === 0 || !keys.includes(e.key)) {
@@ -119,7 +119,7 @@ export function useKeyboardNavigation<T>({
     [items, activeIndex, onSelect, isEnabled, keys]
   );
 
-  // 添加和移除事件监听器
+  // Add and remove event listeners
   useEffect(() => {
     if (isEnabled) {
       window.addEventListener('keydown', handleKeyDown);

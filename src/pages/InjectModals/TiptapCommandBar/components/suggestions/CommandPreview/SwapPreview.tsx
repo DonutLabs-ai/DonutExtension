@@ -5,47 +5,38 @@ import ChevronDown from '@/assets/images/chevronDown.svg?react';
 import Exchange from '@/assets/images/exchange.svg?react';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { toRawAmount, toUiAmount } from '@/utils/amount';
-import { useTokenStore } from '@/stores/tokenStore';
 import { getSwapService } from '@/services/swapService';
 import { numberIndent } from '@/utils/amount';
-// Import necessary type definitions
-interface ParsedCommand {
-  commandId?: string;
-  command?: any;
-  isComplete?: boolean;
-  parameters?: Record<string, any>;
-  parsedParams?: Record<string, any>;
-}
+import { ParsedCommand } from '../../../utils/commandUtils';
+import { enhanceParameters } from '../../../utils/tokenParamUtils';
 
 interface SwapPreviewProps {
   parsedCommand: ParsedCommand;
 }
 
-/**
- * Swap command preview component
- * Displays exchange amount, source token, target token and other information
- */
 const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
   // Extract information from parameters
   const amount = parsedCommand.parameters?.amount || '';
-  const fromToken = parsedCommand.parameters?.fromToken || '';
-  const toToken = parsedCommand.parameters?.toToken || '';
 
-  const tokens = useTokenStore(state => state.tokens);
+  // Enhance tokens using the shared utility function
+  const enhancedParams = useMemo(() => {
+    if (!parsedCommand.command) return {};
+    return enhanceParameters(
+      parsedCommand.command,
+      parsedCommand.parameters || {},
+      parsedCommand.parsedParams
+    );
+  }, [parsedCommand]);
+
+  // Get token information from enhanced parameters
+  const fromTokenInfo = enhancedParams.fromToken;
+  const toTokenInfo = enhancedParams.toToken;
 
   const [estimatedOut, setEstimatedOut] = useState<string>('');
   const [loadingQuote, setLoadingQuote] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const debouncedAmount = useDebouncedValue(amount, 400);
-
-  const fromTokenInfo = useMemo(() => {
-    return Object.values(tokens).find(t => t.symbol.toLowerCase() === fromToken.toLowerCase());
-  }, [tokens, fromToken]);
-
-  const toTokenInfo = useMemo(() => {
-    return Object.values(tokens).find(t => t.symbol.toLowerCase() === toToken.toLowerCase());
-  }, [tokens, toToken]);
 
   const rate = useMemo(() => {
     if (!fromTokenInfo || !toTokenInfo || !estimatedOut) return '';
@@ -78,11 +69,10 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
         inputMint: fromTokenInfo.mint,
         outputMint: toTokenInfo.mint,
         amount: rawAmount,
-        slippageBps: 50,
       })
       .then(q => {
         const outDecimals = toTokenInfo.decimals;
-        setEstimatedOut(toUiAmount(q.outAmount, outDecimals));
+        setEstimatedOut(toUiAmount(q.outputAmount, outDecimals));
       })
       .catch(err => {
         setQuoteError(err?.message || 'Quote error');
@@ -98,7 +88,7 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
   return (
     <div className="flex flex-col max-w-[540px] mx-auto">
       {quoteError && (
-        <div className="text-sm text-destructive mb-4 bg-destructive/10 rounded-base p-2 break-all">
+        <div className="text-sm text-destructive mb-4 bg-destructive/10 rounded-xl p-2 break-all">
           {quoteError}
         </div>
       )}

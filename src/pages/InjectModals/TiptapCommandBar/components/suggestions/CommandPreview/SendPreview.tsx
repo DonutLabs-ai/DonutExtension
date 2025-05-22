@@ -1,27 +1,29 @@
-import React from 'react';
-
-// Import necessary type definitions
-interface ParsedCommand {
-  commandId?: string;
-  command?: any;
-  isComplete?: boolean;
-  parameters?: Record<string, any>;
-  parsedParams?: Record<string, any>;
-}
+import React, { useMemo } from 'react';
+import { ParsedCommand } from '../../../utils/commandUtils';
+import { enhanceParameters } from '../../../utils/tokenParamUtils';
 
 interface SendPreviewProps {
   parsedCommand: ParsedCommand;
 }
 
-/**
- * Send command preview component
- * Displays sending amount, token and recipient address information
- */
 const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand }) => {
   // Extract information from parameters
   const amount = parsedCommand.parameters?.amount || '';
-  const token = parsedCommand.parameters?.token || '';
   const address = parsedCommand.parameters?.address || '';
+
+  // Enhance tokens using the shared utility function
+  const enhancedParams = useMemo(() => {
+    if (!parsedCommand.command) return {};
+    return enhanceParameters(
+      parsedCommand.command,
+      parsedCommand.parameters || {},
+      parsedCommand.parsedParams
+    );
+  }, [parsedCommand]);
+
+  // Get token information from enhanced parameters or fallback to symbol
+  const tokenInfo = enhancedParams.token;
+  const token = tokenInfo?.symbol || parsedCommand.parameters?.token || '';
 
   // Format address display
   const shortAddress =

@@ -38,7 +38,9 @@ export const useTokenNodeHandler = () => {
       const doc = editor.state.doc;
 
       // Get all token parameters from the command
-      const tokenParams = command.params.filter((p: CommandParam) => p.type === ParamType.Token);
+      const tokenParams = command.params.filter((p: CommandParam) =>
+        [ParamType.Token, ParamType.TokenAddress].includes(p.type)
+      );
 
       if (tokenParams.length === 0) {
         // No token parameters to process
@@ -142,8 +144,8 @@ export const useTokenNodeHandler = () => {
       parameters: Record<string, string> = {}
     ): string | null => {
       // Get all token parameters in order
-      const orderedTokenParams = command.params.filter(
-        (p: CommandParam) => p.type === ParamType.Token
+      const orderedTokenParams = command.params.filter((p: CommandParam) =>
+        [ParamType.Token, ParamType.TokenAddress].includes(p.type)
       );
 
       // Build the set of completed token parameters

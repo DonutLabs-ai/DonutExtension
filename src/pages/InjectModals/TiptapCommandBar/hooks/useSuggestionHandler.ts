@@ -103,7 +103,5 @@ export const useSuggestionHandler = () => {
     return SuggestionType.None;
   }, []);
 
-  return {
-    determineSuggestionType,
-  };
+  return { determineSuggestionType };
 };

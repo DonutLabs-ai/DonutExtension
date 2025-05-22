@@ -1,3 +1,4 @@
+import { isAddress } from '@/utils/address';
 import { ParamType } from './commandData';
 import { getTokens } from '@/stores/tokenStore';
 
@@ -48,20 +49,22 @@ export function validateParamValue(value: string, paramType: ParamType): boolean
       );
     }
 
+    case ParamType.TokenAddress: {
+      // Check if it's a special format token mint marker (from TokenNode)
+      // Format: @TOKEN:{mint}@
+      if (cleanValue.startsWith('@TOKEN:') && cleanValue.endsWith('@')) {
+        // If it's a special marker format inserted by TokenNode, return true directly
+        // We no longer validate if the mint is in the list, as this could cause issues (e.g., list updates, network issues, etc.)
+        return true;
+      }
+
+      // Otherwise check if it's address-like
+      return isAddress(cleanValue);
+    }
+
     case ParamType.Address: {
       // Solana wallet address validation
-
-      // Solana address characteristics:
-      // 1. Uses Base58 encoding
-      // 2. Usually 44 characters long (allow a range of length to accommodate manual input)
-      // 3. Contains only numbers and letters, no special characters
-      // 4. Does not include easily confused characters, such as "0", "O", "I" and "l"
-
-      // Base58 character set: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz
-      const base58Regex = /^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$/;
-
-      // Verify it only contains Base58 character set and has reasonable length (about 40-45 characters)
-      return base58Regex.test(cleanValue) && cleanValue.length >= 32 && cleanValue.length <= 50;
+      return isAddress(cleanValue);
     }
 
     case ParamType.Text:
@@ -109,11 +112,27 @@ export function isLikelyParamType(value: string, paramType: ParamType): boolean 
         return sym.includes(w) || w.includes(sym) || name.startsWith(w);
       });
 
+    case ParamType.TokenAddress: {
+      // TokenAddress can be either a token-like value or an address-like value
+      // First check if it's token-like
+      const isTokenLike = getTokens().some(token => {
+        const w = value.toLowerCase();
+        const sym = token.symbol.toLowerCase();
+        const name = token.name.toLowerCase();
+
+        if (sym === w) return true;
+        return sym.includes(w) || w.includes(sym) || name.startsWith(w);
+      });
+
+      // If it looks like a token, return true
+      if (isTokenLike) return true;
+
+      // Otherwise check if it's address-like
+      return isAddress(value);
+    }
+
     case ParamType.Address:
-      // Text that looks like a Solana address:
-      // 1. Contains only Base58 character set (no 0, O, I, l)
-      // 2. Length >= 8 characters (user may have entered only part of the address)
-      return base58Pattern.test(value) && value.length >= 8;
+      return isAddress(value);
 
     case ParamType.Text:
       // Any non-empty string can be a text parameter

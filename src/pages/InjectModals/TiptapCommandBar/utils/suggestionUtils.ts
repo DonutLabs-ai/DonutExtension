@@ -9,10 +9,10 @@ import { validateParamValue } from './validateParamValue';
 export const PARAM_SUGGESTION_MAPPING: Record<ParamType, SuggestionType | null> = {
   // Parameters that need suggestion boxes
   [ParamType.Token]: SuggestionType.Token,
-  [ParamType.Address]: SuggestionType.Address,
-  [ParamType.Text]: SuggestionType.Address, // Using Address as fallback for Text
-
+  [ParamType.TokenAddress]: SuggestionType.Token,
   // Parameters that don't need suggestion boxes
+  [ParamType.Address]: null,
+  [ParamType.Text]: null,
   [ParamType.Amount]: null,
 
   // When adding a new parameter type, add it here with its corresponding suggestion type

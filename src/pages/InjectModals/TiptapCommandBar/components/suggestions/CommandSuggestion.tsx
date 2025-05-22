@@ -135,7 +135,10 @@ const CommandSuggestion = () => {
     }
 
     // If first parameter is Token type, immediately show Token suggestion
-    if (command.params[0].type === ParamType.Token) {
+    if (
+      command.params[0].type === ParamType.Token ||
+      command.params[0].type === ParamType.TokenAddress
+    ) {
       return SuggestionType.Token;
     }
 

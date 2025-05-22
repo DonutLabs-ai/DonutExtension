@@ -15,7 +15,6 @@ export interface ExtendedParsedCommand {
   commandId?: string;
   command?: any;
   isComplete?: boolean;
-  allPromptParamsFilled?: boolean;
   parameters?: Record<string, any>;
   cursorParamId?: string | null;
   commandConfirmed?: boolean;
@@ -264,4 +263,52 @@ export function determineCurrentParamValue(
   }
 
   return currentParamValue;
+}
+
+/**
+ * Enhances command parameters with complete token information
+ * This function enriches token type parameters with full token information based on:
+ * 1. Token references (containing mint addresses) from parsedParams
+ * 2. Token symbols from regular parameters
+ *
+ * @param commandDef Command definition containing parameter specifications
+ * @param parameters Command parameters to enhance
+ * @param parsedParams Optional parsed parameters that may contain token references
+ * @returns Enhanced parameters with complete token information
+ */
+export function enhanceParameters(
+  commandDef: any,
+  parameters: Record<string, any>,
+  parsedParams?: Record<string, any>
+): Record<string, any> {
+  const enhancedParameters: Record<string, any> = { ...parameters };
+  const tokens = useTokenStore.getState().tokens;
+
+  // Process all token type parameters
+  commandDef.params.forEach((param: any) => {
+    if ([ParamType.Token, ParamType.TokenAddress].includes(param.type) && parameters[param.id]) {
+      // First check if we have a token reference in parsedParams
+      const paramRef = parsedParams?.[param.id]?.value;
+
+      if (paramRef && isTokenReference(paramRef)) {
+        // Extract mint from reference and get complete token info
+        const tokenInfo = getTokenInfoFromReference(paramRef);
+        if (tokenInfo) {
+          // Replace parameter value with complete token info object
+          enhancedParameters[param.id] = tokenInfo;
+        }
+      } else {
+        // Try to find token by symbol
+        const paramValue = parameters[param.id];
+        const tokenInfo = Object.values(tokens).find(
+          t => t.symbol.toLowerCase() === paramValue.toLowerCase()
+        );
+        if (tokenInfo) {
+          enhancedParameters[param.id] = tokenInfo;
+        }
+      }
+    }
+  });
+
+  return enhancedParameters;
 }

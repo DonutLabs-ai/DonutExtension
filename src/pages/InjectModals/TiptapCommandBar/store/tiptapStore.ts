@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { CommandOption } from '../utils/commandData';
 import { Editor } from '@tiptap/core';
+import { ParsedCommand } from '../utils/commandUtils';
 
 export enum SuggestionType {
   None = 'none',
@@ -8,19 +8,6 @@ export enum SuggestionType {
   Token = 'token',
   Address = 'address',
   Preview = 'preview',
-}
-
-export interface ParsedCommand {
-  startsWithSlash: boolean;
-  commandId?: string;
-  command?: CommandOption;
-  isComplete?: boolean;
-  allPromptParamsFilled?: boolean;
-  parameters?: Record<string, any>;
-  cursorParamId?: string | null;
-  commandConfirmed?: boolean;
-  parsedParams?: Record<string, any>;
-  nextParamNeedingSuggestionId?: string | null;
 }
 
 interface TiptapCommandBarState {

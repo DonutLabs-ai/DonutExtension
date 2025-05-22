@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { commands, CommandOption } from '../utils/commandData';
+import { commands, CommandOption, CommandIdType } from '../utils/commandData';
 import { ParsedCommand, parseCommandFromText } from '../utils/commandUtils';
 import {
   collectWordPositionsFrom,
@@ -40,7 +40,7 @@ export const useCommandParser = () => {
    * @param commandId Command ID to find
    * @returns Command definition or undefined if not found
    */
-  const findCommandById = useCallback((commandId: string): CommandOption | undefined => {
+  const findCommandById = useCallback((commandId: CommandIdType): CommandOption | undefined => {
     return commands.find(cmd => cmd.id === commandId);
   }, []);
 

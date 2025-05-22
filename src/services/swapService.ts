@@ -5,10 +5,6 @@ import { toRawAmount } from '@/utils/amount';
 import { getPopupEventService } from '@/services/popupEventService';
 import { getMCPService } from './mcpService';
 
-// ---- Constants ----
-const QUOTE_API = 'https://quote-api.jup.ag/v6/quote';
-const SWAP_API = 'https://quote-api.jup.ag/v6/swap';
-
 const QUOTE_CACHE_TTL = 8_000; // 8s
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 500; // ms
@@ -16,44 +12,16 @@ const RETRY_DELAY = 500; // ms
 interface QuoteParams {
   inputMint: string;
   outputMint: string;
-  amount: string; // human-readable amount (e.g. "1.5")
-  slippageBps?: number; // default 50 bps (0.5%)
-}
-
-interface SwapInfo {
-  ammKey: string;
-  label: string;
-  inputMint: string;
-  outputMint: string;
-  inAmount: string;
-  outAmount: string;
-  feeAmount: string;
-  feeMint: string;
-}
-
-interface RoutePlan {
-  swapInfo: SwapInfo;
-  percent: number;
+  amount: string;
 }
 
 interface QuoteResponse {
-  // Jupiter API v6 response structure
-  inputMint: string;
-  outputMint: string;
-  inAmount: string;
-  outAmount: string;
-  otherAmountThreshold: string;
-  swapMode: string;
-  slippageBps: number;
-  platformFee: any;
-  priceImpactPct: string;
-  routePlan: RoutePlan[];
-  scoreReport: any;
-  contextSlot: number;
-  timeTaken: number;
-  swapUsdValue: string;
-  simplerRouteUsed: boolean;
-  useIncurredSlippageForQuoting: any;
+  status: string;
+  inputToken: string;
+  outputToken: string;
+  inputAmount: number;
+  outputAmount: string;
+  message: string;
 }
 
 class SwapService {
@@ -61,8 +29,8 @@ class SwapService {
 
   // ---- Public (proxied) APIs ----
   async getQuote(params: QuoteParams, retryCount = 0): Promise<QuoteResponse> {
-    const { inputMint, outputMint, amount, slippageBps = 50 } = params;
-    const key = `${inputMint}|${outputMint}|${amount}|${slippageBps}`;
+    const { inputMint, outputMint, amount } = params;
+    const key = `${inputMint}|${outputMint}|${amount}`;
 
     const cached = this.quoteCache.get(key);
     if (cached && cached.expires > Date.now()) {
@@ -70,29 +38,24 @@ class SwapService {
     }
 
     try {
-      // const mcpService = getMCPService();
-      // const mcpQuote = await mcpService.callTool('GET_JUPITER_QUOTE', {
-      //   inputMint,
-      //   outputMint,
-      //   inputAmount: Number(amount),
-      // });
-      // const text = mcpQuote.content[0].text;
-      // if (!text) throw new Error('Failed to get quote');
-      // console.log('MCP Quote:', JSON.parse(text));
+      const mcpService = getMCPService();
+      const mcpQuote = await mcpService.callTool('GET_JUPITER_QUOTE', {
+        inputMint,
+        outputMint,
+        inputAmount: Number(amount),
+      });
 
-      const url = `${QUOTE_API}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}`;
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        const errorText = await res.text().catch(() => 'Unknown error');
-        throw new Error(`Quote error ${res.status}: ${errorText}`);
+      let json;
+      try {
+        const text = mcpQuote.content[0].text;
+        if (!text) throw new Error('Failed to get quote');
+        json = JSON.parse(text);
+        if (json.status !== 'success') throw new Error('Failed to get quote');
+      } catch (error) {
+        throw new Error('Failed to get quote');
       }
 
-      const json = await res.json();
-      console.log('Jupiter Quote API response:', json);
-
-      // Jupiter v6 API structure validation
-      if (!json?.outAmount) {
+      if (!json?.outputAmount) {
         console.error('Unexpected Jupiter API response structure:', json);
         throw new Error('Invalid route data from Jupiter API');
       }
@@ -112,37 +75,26 @@ class SwapService {
     }
   }
 
-  async buildSwap(quoteResponse: any, userPublicKey: string): Promise<string> {
-    const body = JSON.stringify({
-      quoteResponse,
-      userPublicKey,
-      wrapAndUnwrapSol: true,
-    });
-
+  async buildSwap(quoteResponse: QuoteResponse, userPublicKey: string): Promise<string> {
     try {
-      // const mcpService = getMCPService();
-      // const mcpSwap = await mcpService.callTool('GET_JUPITER_UNSIGNED_SWAP', {
-      //   inputMint: quoteResponse.inputMint,
-      //   outputMint: quoteResponse.outputMint,
-      //   inputAmount: Number(quoteResponse.inAmount),
-      //   publicKey: userPublicKey,
-      // });
-      // const text = mcpSwap.content[0].text;
-      // if (!text) throw new Error('Failed to get swap');
-      // console.log('MCP Swap:', JSON.parse(text));
-
-      const res = await fetch(SWAP_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body,
+      const mcpService = getMCPService();
+      const mcpSwap = await mcpService.callTool('GET_JUPITER_UNSIGNED_SWAP', {
+        inputMint: quoteResponse.inputToken,
+        outputMint: quoteResponse.outputToken,
+        inputAmount: quoteResponse.inputAmount,
+        publicKey: userPublicKey,
       });
 
-      if (!res.ok) {
-        const errorText = await res.text().catch(() => 'Unknown error');
-        throw new Error(`Swap build error ${res.status}: ${errorText}`);
+      let json;
+      try {
+        const text = mcpSwap.content[0].text;
+        if (!text) throw new Error('Failed to swap');
+        json = JSON.parse(text);
+        if (json.status !== 'success') throw new Error('Failed to swap');
+      } catch (error) {
+        throw new Error('Failed to swap');
       }
 
-      const json = await res.json();
       const { swapTransaction } = json;
       if (!swapTransaction) throw new Error('Missing swapTransaction');
 

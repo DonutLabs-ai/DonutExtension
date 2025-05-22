@@ -1,56 +1,21 @@
 import { useState } from 'react';
 import { getSwapService } from '@/services/swapService';
-import { useTokenStore } from '@/stores/tokenStore';
 import { useToast } from '@/components/ToastProvider';
 import { useCommandHistoryStore } from '@/stores';
 import { SuggestionType, useTiptapCommandBarStore } from '../store/tiptapStore';
-import { CommandOption, ParamType } from '../utils/commandData';
-import { isTokenReference, getTokenInfoFromReference } from '../utils/tokenParamUtils';
+import { CommandIdType } from '../utils/commandData';
+import { enhanceParameters } from '../utils/tokenParamUtils';
+import { getDocVisualContent } from '../utils/editorUtils';
 
 /**
  * Custom hook for handling Tiptap command execution and result display
  */
-export const useTiptapCommandExecution = () => {
+export const useCommandExecution = () => {
   const [isExecuting, setIsExecuting] = useState(false);
   const toast = useToast();
   const { parsedCommand, editor, setParsedCommand, setSelectedCommand, setActiveSuggestion } =
     useTiptapCommandBarStore();
   const { addRecord } = useCommandHistoryStore();
-  const { tokens } = useTokenStore();
-
-  /**
-   * Enhance command parameters, get complete token information
-   */
-  const enhanceParameters = (commandDef: CommandOption, parameters: Record<string, any>) => {
-    const enhancedParameters: Record<string, any> = { ...parameters };
-
-    // Process all token type parameters
-    commandDef.params.forEach(param => {
-      if (param.type === ParamType.Token && parameters[param.id]) {
-        const paramValue = parameters[param.id];
-
-        // Check if parameter value is in token reference format
-        if (isTokenReference(paramValue)) {
-          // Extract mint from reference and get complete token info
-          const tokenInfo = getTokenInfoFromReference(paramValue);
-          if (tokenInfo) {
-            // Replace parameter value with complete token info object
-            enhancedParameters[param.id] = tokenInfo;
-          }
-        } else {
-          // Try to find token by symbol
-          const tokenInfo = Object.values(tokens).find(
-            t => t.symbol.toLowerCase() === paramValue.toLowerCase()
-          );
-          if (tokenInfo) {
-            enhancedParameters[param.id] = tokenInfo;
-          }
-        }
-      }
-    });
-
-    return enhancedParameters;
-  };
 
   /**
    * Helper function to clear editor content
@@ -94,18 +59,19 @@ export const useTiptapCommandExecution = () => {
 
       try {
         // Get command text for history record
-        const commandText = editor.getText();
-        const commandId = parsedCommand.commandId; // Save variable to avoid using potentially undefined value repeatedly
+        const commandText = getDocVisualContent(editor.state.doc);
+        const commandId = parsedCommand.commandId;
 
-        // Get enhanced parameters
+        // Get enhanced parameters using the shared utility function
         const enhancedParams = enhanceParameters(
           parsedCommand.command,
-          parsedCommand.parameters || {}
+          parsedCommand.parameters || {},
+          parsedCommand.parsedParams
         );
 
         // Execute different operations based on command type
         switch (commandId) {
-          case 'swap': {
+          case CommandIdType.Swap: {
             // Use immediately invoked async function to handle swap command
             (async () => {
               try {
@@ -144,7 +110,7 @@ export const useTiptapCommandExecution = () => {
             })();
             break;
           }
-          case 'send': {
+          case CommandIdType.Send: {
             // Use immediately invoked async function to handle send command
             (async () => {
               try {
@@ -203,6 +169,11 @@ export const useTiptapCommandExecution = () => {
       return;
     }
 
+    // No need to trigger execution event
+    if ([CommandIdType.RugCheck, CommandIdType.Chart].includes(parsedCommand.commandId)) {
+      return;
+    }
+
     try {
       setIsExecuting(true);
 
@@ -238,4 +209,4 @@ export const useTiptapCommandExecution = () => {
   };
 };
 
-export default useTiptapCommandExecution;
+export default useCommandExecution;

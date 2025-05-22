@@ -13,30 +13,30 @@ export interface CommandHistory {
 
 interface CommandHistoryStoreState {
   history: Record<string, CommandHistory[]>;
-  addRecord: (command: string, commandType: string) => void;
-  getHistory: (commandType: string) => CommandHistory[];
+  addRecord: (command: string, commandId: string) => void;
+  getHistory: (commandId: string) => CommandHistory[];
   clear: () => void;
 }
 
 // Create base zustand store
 export const useCommandHistoryStore = create<CommandHistoryStoreState>((set, get) => ({
   history: {},
-  addRecord: (command, commandType) =>
+  addRecord: (command, commandId) =>
     set(state => ({
       history: {
         ...state.history,
-        [commandType]: [
+        [commandId]: [
           {
             id: nanoid(),
             timestamp: Date.now(),
             command,
-            commandType,
+            commandId,
           },
-          ...(state.history?.[commandType] || []),
+          ...(state.history?.[commandId] || []),
         ].slice(0, 50), // keep only the 50 most recent records
       },
     })),
-  getHistory: (commandType: string) => get().history?.[commandType] || [],
+  getHistory: (commandId: string) => get().history?.[commandId] || [],
   clear: () => set({ history: {} }),
 }));
 
