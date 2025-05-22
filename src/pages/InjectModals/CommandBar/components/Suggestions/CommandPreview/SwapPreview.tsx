@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BigNumber } from 'bignumber.js';
 import { ParsedCommand } from '../../../utils/commandParser';
-import { getSwapService } from '@/services/swapService';
+import { getTokenOperationsService } from '@/services/tokenOperationsService';
 import { useTokenStore } from '@/stores/tokenStore';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/shadcn/avatar';
 import { toRawAmount, toUiAmount } from '@/utils/amount';
@@ -64,7 +64,7 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
 
     const rawAmount = toRawAmount(debouncedAmount, decimals);
 
-    const svc = getSwapService();
+    const svc = getTokenOperationsService();
     const controller = new AbortController();
     setLoadingQuote(true);
     setQuoteError(null);

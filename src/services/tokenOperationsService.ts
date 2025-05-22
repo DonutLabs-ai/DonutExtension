@@ -24,7 +24,7 @@ interface QuoteResponse {
   message: string;
 }
 
-class SwapService {
+class TokenOperationsService {
   private quoteCache = new Map<string, { expires: number; data: QuoteResponse }>();
 
   // ---- Public (proxied) APIs ----
@@ -162,7 +162,7 @@ class SwapService {
   }
 }
 
-export const [registerSwapService, getSwapService] = defineProxyService(
-  'swapService',
-  () => new SwapService()
+export const [registerTokenOperationsService, getTokenOperationsService] = defineProxyService(
+  'tokenOperationsService',
+  () => new TokenOperationsService()
 );

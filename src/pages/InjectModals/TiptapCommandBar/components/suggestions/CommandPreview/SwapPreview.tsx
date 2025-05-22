@@ -5,7 +5,7 @@ import ChevronDown from '@/assets/images/chevronDown.svg?react';
 import Exchange from '@/assets/images/exchange.svg?react';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { toRawAmount, toUiAmount } from '@/utils/amount';
-import { getSwapService } from '@/services/swapService';
+import { getTokenOperationsService } from '@/services/tokenOperationsService';
 import { numberIndent } from '@/utils/amount';
 import { ParsedCommand } from '../../../utils/commandUtils';
 import { enhanceParameters } from '../../../utils/tokenParamUtils';
@@ -59,7 +59,7 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
     const decimals = fromTokenInfo.decimals;
     const rawAmount = toRawAmount(debouncedAmount, decimals);
 
-    const svc = getSwapService();
+    const svc = getTokenOperationsService();
     const controller = new AbortController();
     setLoadingQuote(true);
     setQuoteError(null);

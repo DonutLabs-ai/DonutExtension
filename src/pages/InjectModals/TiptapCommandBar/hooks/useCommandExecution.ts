@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { getSwapService } from '@/services/swapService';
+import { getTokenOperationsService } from '@/services/tokenOperationsService';
 import { useToast } from '@/components/ToastProvider';
 import { useCommandHistoryStore } from '@/stores';
 import { SuggestionType, useTiptapCommandBarStore } from '../store/tiptapStore';
@@ -93,8 +93,8 @@ export const useCommandExecution = () => {
                   return;
                 }
 
-                const swapService = getSwapService();
-                const sig = await swapService.executeSwap({
+                const tokenOperationsService = getTokenOperationsService();
+                const sig = await tokenOperationsService.executeSwap({
                   inputMint: fromMint,
                   outputMint: toMint,
                   amount,

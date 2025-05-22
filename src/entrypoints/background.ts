@@ -1,6 +1,6 @@
 import { initBackgroundTransport } from '@/utils/transport';
 import { registerTokenService } from '@/services/tokenService';
-import { registerSwapService } from '@/services/swapService';
+import { registerTokenOperationsService } from '@/services/tokenOperationsService';
 import { registerPopupEventService } from '@/services/popupEventService';
 import { registerMCPService } from '@/services/mcpService';
 import { registerAICompletionService } from '@/services/aiCompletionService';
@@ -17,7 +17,7 @@ export default {
 
     // Step 3: Register RPC services
     registerTokenService();
-    registerSwapService();
+    registerTokenOperationsService();
     registerPopupEventService();
     registerMCPService();
     registerAICompletionService();
