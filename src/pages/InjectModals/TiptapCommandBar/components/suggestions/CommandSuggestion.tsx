@@ -201,23 +201,25 @@ const CommandSuggestion = () => {
   if (filteredCommands.length === 0) return null;
 
   return (
-    <div className="w-full space-y-1 p-5">
+    <div className="w-full">
       {filteredCommands.map((command, index) => (
         <div
           key={command.id}
           className={cn(
-            'w-full px-3 py-2.5 rounded-lg font-medium cursor-pointer transition-all duration-150',
-            'flex items-center',
+            'w-full h-[54px] px-[30px] rounded-lg cursor-pointer transition-all duration-150',
+            'flex items-center gap-2',
             index === activeIndex && 'bg-accent'
           )}
           onMouseEnter={() => setActiveIndex(index)}
           onClick={() => handleCommandSelect(command)}
         >
-          <span className="mr-2 text-sm px-1.5 py-0.5 bg-secondary rounded text-foreground">/</span>
-          <span className="text-primary">{command.title}</span>
-          {command.description && (
-            <span className="ml-2 text-sm text-muted-foreground">{command.description}</span>
-          )}
+          <img src={command.icon} alt={command.title} className="size-5" />
+          <div className="flex-1 text-base">
+            <span className="text-primary">{command.title}</span>
+            {command.description && (
+              <span className="text-muted-foreground"> - {command.description}</span>
+            )}
+          </div>
         </div>
       ))}
     </div>

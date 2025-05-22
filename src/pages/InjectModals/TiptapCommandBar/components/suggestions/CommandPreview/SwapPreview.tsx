@@ -96,26 +96,25 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
   }, [debouncedAmount, fromTokenInfo, toTokenInfo]);
 
   return (
-    <div>
-      <div className="text-sm font-medium mb-3">Swap Preview</div>
+    <div className="flex flex-col max-w-[540px] mx-auto">
       {quoteError && (
-        <div className="text-sm text-destructive mb-2 bg-destructive/10 rounded-base p-2 break-all">
+        <div className="text-sm text-destructive mb-4 bg-destructive/10 rounded-base p-2 break-all">
           {quoteError}
         </div>
       )}
       {/* Exchange area */}
       <div className="flex items-center justify-between gap-6">
         {/* Sell area */}
-        <div className="border border-border rounded-lg p-3 flex-1">
-          <div className="text-sm mb-2">Selling</div>
-          <div className="flex items-center">
-            <div className="text-2xl flex-1 truncate">{numberIndent(amount, { digits: 4 })}</div>
-            <div className="flex items-center gap-2 bg-accent rounded-xl py-2 px-3">
-              <Avatar className="w-5 h-5">
+        <div className="border border-task-border rounded-2xl p-3 flex-1">
+          <div className="text-sm text-light-blue mb-1">Selling</div>
+          <div className="flex flex-col gap-2 items-end">
+            <div className="text-xl flex-1 truncate">{numberIndent(amount, { digits: 4 })}</div>
+            <div className="flex items-center gap-2 bg-accent rounded-full py-1 px-2">
+              <Avatar className="w-4 h-4">
                 <AvatarImage src={fromTokenInfo?.logoURI} alt={fromTokenInfo?.symbol} />
                 <AvatarFallback>{fromTokenInfo?.symbol?.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="text-base">{fromTokenInfo?.symbol}</div>
+              <div className="text-sm">{fromTokenInfo?.symbol}</div>
               <ChevronDown />
             </div>
           </div>
@@ -127,18 +126,18 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
         </div>
 
         {/* Buy area */}
-        <div className="border border-border rounded-lg p-3 flex-1">
-          <div className="text-sm mb-2">Buying</div>
-          <div className="flex items-center justify-between">
-            <div className="text-2xl flex-1 truncate">
+        <div className="border border-task-border rounded-2xl p-3 flex-1">
+          <div className="text-sm text-light-blue mb-1">Buying</div>
+          <div className="flex flex-col gap-2 items-end">
+            <div className="text-xl flex-1 truncate">
               {loadingQuote ? '...' : numberIndent(estimatedOut, { digits: 4 })}
             </div>
-            <div className="flex items-center gap-2 bg-accent rounded-xl py-2 px-3">
-              <Avatar className="w-5 h-5">
+            <div className="flex items-center gap-2 bg-accent rounded-full py-1 px-2">
+              <Avatar className="w-4 h-4">
                 <AvatarImage src={toTokenInfo?.logoURI} alt={toTokenInfo?.symbol} />
                 <AvatarFallback>{toTokenInfo?.symbol?.charAt(0)}</AvatarFallback>
               </Avatar>
-              <div className="text-base">{toTokenInfo?.symbol}</div>
+              <div className="text-sm">{toTokenInfo?.symbol}</div>
               <ChevronDown />
             </div>
           </div>

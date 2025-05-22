@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useCallback } from 'react';
+import bignumber from 'bignumber.js';
 import { cn } from '@/utils/shadcn';
 import { useTiptapCommandBarStore } from '../../store/tiptapStore';
 import { ParamType } from '../../utils/commandData';
@@ -238,14 +239,14 @@ const TokenSuggestion = () => {
   }
 
   return (
-    <div className="w-full p-5">
-      <div className="text-sm font-medium text-muted-foreground mb-2">Select Token</div>
+    <div className="w-full py-6 px-[30px]">
+      <div className="text-base text-muted-foreground mb-4">Select Token</div>
       <div className="grid grid-cols-2 gap-2">
         {filteredTokens.map((token, index) => (
           <div
             key={token.symbol + token.mint.slice(0, 6)}
             className={cn(
-              'px-3 py-2 rounded-2xl cursor-pointer transition-colors duration-150 border border-accent bg-accent',
+              'px-4 py-2 rounded-2xl cursor-pointer transition-colors duration-150 border border-accent bg-accent',
               'flex items-center gap-2 overflow-hidden',
               activeIndex === index && 'border-primary'
             )}
@@ -258,17 +259,19 @@ const TokenSuggestion = () => {
             </Avatar>
 
             <div className="flex flex-col space-y-1 flex-1 overflow-hidden">
-              <div className="truncate text-accent-foreground">{token.symbol}</div>
-              <div className="truncate text-xs text-muted-foreground leading-none">
-                {token.name}
+              <div className="truncate text-foreground text-sm font-semibold">{token.name}</div>
+              <div className="truncate text-xs font-medium text-muted-foreground">
+                {numberIndent(token.balance, { digits: 2 })} {token.symbol}
               </div>
             </div>
 
             <div className="flex flex-col items-end space-y-1">
-              <div className="text-accent-foreground">
-                {numberIndent(token.balance, { digits: 2 })}
+              <div className="text-foreground text-sm font-semibold">
+                {numberIndent(bignumber(token.balance).multipliedBy(token.price).toFixed(), {
+                  digits: 2,
+                })}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs font-medium text-muted-foreground">
                 ${numberIndent(token.price, { digits: 2 })}
               </div>
             </div>

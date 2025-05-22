@@ -1,3 +1,7 @@
+import jupiter from '@/assets/images/jupiter.png';
+import solsniffer from '@/assets/images/solsniffer.png';
+import logo from '@/assets/images/logo.png';
+
 export enum ParamType {
   Amount = 'amount',
   Token = 'token',
@@ -15,6 +19,7 @@ export interface CommandParam {
 
 export interface CommandOption {
   id: string;
+  icon: string;
   title: string;
   description?: string;
   category?: string;
@@ -25,8 +30,9 @@ export interface CommandOption {
 export const commands: CommandOption[] = [
   {
     id: 'swap',
+    icon: jupiter,
     title: 'Swap',
-    description: 'Swap tokens',
+    description: 'Swap token on Jupiter',
     category: 'transaction',
     params: [
       {
@@ -54,6 +60,7 @@ export const commands: CommandOption[] = [
   },
   {
     id: 'send',
+    icon: logo,
     title: 'Send',
     description: 'Send tokens to an address',
     category: 'transaction',

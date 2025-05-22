@@ -31,6 +31,8 @@ export default {
         'sidebar-accent-foreground': 'var(--sidebar-accent-foreground)',
         'sidebar-border': 'var(--sidebar-border)',
         'sidebar-ring': 'var(--sidebar-ring)',
+        'light-blue': 'var(--light-blue)',
+        'task-border': 'var(--task-border)',
       },
       borderRadius: {
         lg: 'var(--radius)',

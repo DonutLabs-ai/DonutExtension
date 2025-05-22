@@ -42,7 +42,7 @@ const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) 
         }}
       >
         <div className="bg-background rounded-[44px] overflow-hidden">
-          <div className="py-6 px-7 flex gap-2">
+          <div className="py-6 px-[30px] flex gap-2">
             <Logo className="w-10 h-10 text-foreground" />
             <div className="w-[calc(100%-48px)] mt-[6px]">
               <TiptapEditor className="w-full" />

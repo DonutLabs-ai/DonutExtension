@@ -11,7 +11,7 @@ const CommandPreview = () => {
   }
 
   return (
-    <div className="w-full p-5 text-foreground">
+    <div className="w-full py-6 px-[30px] text-foreground">
       {parsedCommand.commandId === 'swap' && <SwapPreview parsedCommand={parsedCommand} />}
 
       {parsedCommand.commandId === 'send' && <SendPreview parsedCommand={parsedCommand} />}
