@@ -191,3 +191,8 @@
 .suffix-hint::after {
   content: attr(data-text);
 }
+
+/* Command highlight styles */
+.ProseMirror .command-completed {
+  color: var(--primary) !important;
+}

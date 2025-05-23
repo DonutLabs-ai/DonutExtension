@@ -9,6 +9,7 @@ import { TokenReplacer } from '../extensions/TokenReplacer';
 import { SpaceTransformer } from '../extensions/SpaceTransformer';
 import { DisableEnter, FixTrailingNodesExtension } from '../extensions/EditorExtensions';
 import { SuffixHint } from '../extensions/SuffixHint';
+import { CommandHighlight } from '../extensions/CommandHighlight';
 import {
   removeTrailingNodesWithEditor,
   maintainCursorPosition,
@@ -160,6 +161,11 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
       TokenReplacer,
       SpaceTransformer,
       FixTrailingNodesExtension,
+      CommandHighlight.configure({
+        HTMLAttributes: {
+          class: 'command-completed',
+        },
+      }),
     ],
     content: '',
     editorProps: {
