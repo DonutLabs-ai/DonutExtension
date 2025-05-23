@@ -24,6 +24,19 @@ interface QuoteResponse {
   message: string;
 }
 
+interface TransferParams {
+  from: string;
+  to: string;
+  amount: number;
+  mint: string;
+}
+
+interface ExecuteTransferParams {
+  to: string;
+  amount: string;
+  mint: string;
+}
+
 class TokenOperationsService {
   private quoteCache = new Map<string, { expires: number; data: QuoteResponse }>();
 
@@ -151,6 +164,74 @@ class TokenOperationsService {
       }
     } catch (e) {
       console.error('Error creating swap description:', e);
+    }
+
+    const signature = await popupEventService.requestTransactionSign({
+      transaction: txStr,
+      description,
+    });
+
+    return signature;
+  }
+
+  async buildTransfer(params: TransferParams): Promise<string> {
+    try {
+      const mcpService = getMCPService();
+      const mcpTransfer = await mcpService.callTool('TRANSFER_UNSIGNED', params);
+
+      let json;
+      try {
+        const text = mcpTransfer.content[0].text;
+        if (!text) throw new Error('Failed to build transfer');
+        json = JSON.parse(text);
+        if (json.status !== 'success') throw new Error('Failed to build transfer');
+      } catch (error) {
+        throw new Error('Failed to build transfer');
+      }
+
+      const { transaction } = json;
+      if (!transaction?.serializedTx) throw new Error('Missing transaction data');
+
+      return transaction.serializedTx;
+    } catch (err) {
+      console.error('Error building transfer transaction:', err);
+      throw err;
+    }
+  }
+
+  /**
+   * High-level helper: build → sign+send transfer transaction, returns tx signature
+   */
+  async executeTransfer(params: ExecuteTransferParams): Promise<string> {
+    const tokens = useTokenStore.getState().tokens;
+
+    const walletAddr = useWalletStore.getState().address;
+    if (!walletAddr) {
+      const popupEventService = getPopupEventService();
+      const walletAddress = await popupEventService.requestWalletConnect();
+      useWalletStore.getState().setAddress(walletAddress);
+    }
+
+    const currentWalletAddr = useWalletStore.getState().address;
+    if (!currentWalletAddr) throw new Error('Wallet not connected');
+
+    const txStr = await this.buildTransfer({
+      from: currentWalletAddr,
+      to: params.to,
+      amount: Number(params.amount),
+      mint: params.mint,
+    });
+
+    const popupEventService = getPopupEventService();
+    let description = `Transfer ${params.amount} tokens to ${params.to}`;
+
+    try {
+      const tokenSymbol = tokens[params.mint]?.symbol;
+      if (tokenSymbol) {
+        description = `Transfer ${params.amount} ${tokenSymbol} to ${params.to}`;
+      }
+    } catch (e) {
+      console.error('Error creating transfer description:', e);
     }
 
     const signature = await popupEventService.requestTransactionSign({

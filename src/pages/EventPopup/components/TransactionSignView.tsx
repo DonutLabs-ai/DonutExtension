@@ -3,7 +3,16 @@ import { PopupEvent, PopupEventType } from '@/stores/popupEventStore';
 import { TransactionSignData } from '@/services/popupEventService';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 import { SolanaWallet } from '@web3auth/solana-provider';
-import { VersionedTransaction } from '@solana/web3.js';
+import { Transaction, VersionedTransaction } from '@solana/web3.js';
+
+export function checkVersionedTransaction(txBuffer: Buffer) {
+  try {
+    VersionedTransaction.deserialize(txBuffer);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 
 interface TransactionSignViewProps {
   event: PopupEvent;
@@ -38,7 +47,10 @@ const TransactionSignView: React.FC<TransactionSignViewProps> = ({
         const data = event.data as TransactionSignData;
         const solanaWallet = new SolanaWallet(provider);
         const txBuffer = Buffer.from(data.transaction, 'base64');
-        const tx = VersionedTransaction.deserialize(txBuffer);
+        const isVersionedTransaction = checkVersionedTransaction(txBuffer);
+        const tx = isVersionedTransaction
+          ? VersionedTransaction.deserialize(txBuffer)
+          : Transaction.from(txBuffer);
 
         setStatusMessage('Signing transaction...');
         const { signature } = await solanaWallet.signAndSendTransaction(tx);
@@ -46,6 +58,7 @@ const TransactionSignView: React.FC<TransactionSignViewProps> = ({
         // Success - automatically close
         await onApprove(signature);
       } catch (error) {
+        console.error('TransactionSignView error', error);
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
         setStatusMessage(`Signing failed: ${errorMessage}`);
 

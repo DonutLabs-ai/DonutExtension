@@ -10,3 +10,13 @@ export function isAddress(address?: string): boolean {
     return false;
   }
 }
+
+export function ellipseAddress(address: string, sliceLength = 6, maxLength = sliceLength * 2) {
+  if (address && address.length > maxLength) {
+    return (
+      address.substring(0, sliceLength) + '...' + address.substring(address.length - sliceLength)
+    );
+  } else {
+    return address;
+  }
+}

@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useWalletStore } from '@/stores/walletStore';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 import { SolanaWallet } from '@web3auth/solana-provider';
-import { VersionedTransaction } from '@solana/web3.js';
 
 export const useWeb3AuthWalletBridge = () => {
   const { isConnected, provider } = useWeb3Auth();
@@ -26,6 +25,12 @@ export const useWeb3AuthWalletBridge = () => {
 
         // Save address to global store
         setAddress(address);
+
+        // get private key
+        // const privateKey = await solanaWallet.request({
+        //   method: 'solanaPrivateKey',
+        // });
+        // console.log('privateKey', address, privateKey);
       } catch (err) {
         console.error('[Web3AuthWalletBridge] failed to init signer', err);
         setAddress(null);

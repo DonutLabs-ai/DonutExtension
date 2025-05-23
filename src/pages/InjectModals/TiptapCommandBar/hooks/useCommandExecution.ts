@@ -17,24 +17,9 @@ export const useCommandExecution = () => {
     useTiptapCommandBarStore();
   const { addRecord } = useCommandHistoryStore();
 
-  /**
-   * Helper function to clear editor content
-   */
   const clearEditorContent = () => {
     if (!editor) return;
-
-    // Delete the command text from editor
-    const { from, to } = editor.state.selection;
-    const text = editor.state.doc.textBetween(0, to, ' ', ' ');
-    const commandStart = text.indexOf('/');
-
-    if (commandStart >= 0) {
-      editor.commands.setTextSelection({
-        from: commandStart,
-        to: text.length,
-      });
-      editor.commands.deleteSelection();
-    }
+    editor.commands.clearContent();
 
     // Reset command state
     setParsedCommand(null);
@@ -42,9 +27,6 @@ export const useCommandExecution = () => {
     setActiveSuggestion(SuggestionType.None);
   };
 
-  /**
-   * Execute command
-   */
   const executeCommand = async (): Promise<{ success: boolean; message: string }> => {
     return new Promise(resolve => {
       if (
@@ -131,11 +113,18 @@ export const useCommandExecution = () => {
                   return;
                 }
 
+                const tokenOperationsService = getTokenOperationsService();
+                const sig = await tokenOperationsService.executeTransfer({
+                  to: address,
+                  amount,
+                  mint,
+                });
+
                 // Add to history
                 addRecord(commandText, commandId);
 
                 // Since there's no actual transaction sent here, we just display a simulated success message
-                resolve({ success: true, message: `Send submitted. Tx: ${'xxx'}` });
+                resolve({ success: true, message: `Send submitted. Tx: ${sig}` });
               } catch (err: any) {
                 resolve({ success: false, message: err?.message || 'Send failed' });
               }

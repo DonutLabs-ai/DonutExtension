@@ -6,7 +6,7 @@
   caret-color: var(--foreground);
   color: var(--foreground);
 
-  /* 确保空格不会导致换行 */
+  /* Ensure that spaces do not cause line breaks */
   white-space: pre-wrap;
   word-wrap: break-word;
   word-break: normal;
@@ -19,12 +19,12 @@
 .ProseMirror p {
   margin: 0;
   line-height: 1.5;
-  word-break: keep-all;
+  word-break: break-all;
   overflow-wrap: break-word;
   white-space: pre-wrap;
 }
 
-/* 修复Token后面自动添加的元素导致换行问题 */
+/* Fixed a line feed problem caused by automatically added elements after Token */
 .ProseMirror-separator {
   display: none !important;
 }
@@ -33,25 +33,25 @@
   display: none;
 }
 
-/* 确保TokenNode后不会出现额外空格或换行 */
+/* Ensure that no extra spaces or newlines appear after TokenNode */
 .token-view-wrapper + br,
 .token-view-wrapper + img {
   display: none !important;
 }
 
-/* 确保编辑器中的行内节点正确对齐 */
+/* Ensure that intra-row nodes in the editor are correctly aligned */
 .ProseMirror * {
   vertical-align: baseline;
 }
 
-/* 非断行空格相关样式，确保它们正确显示 */
+/* Non-break space-related styles to ensure they are displayed correctly */
 .ProseMirror .non-breaking-space,
 .ProseMirror .nbsp {
   white-space: nowrap;
   display: inline;
 }
 
-/* 确保所有文本不会在不适当的位置换行 */
+/* Ensure that all text does not wrap in inappropriate places */
 .ProseMirror span,
 .ProseMirror a {
   white-space: nowrap;
@@ -144,7 +144,7 @@
   padding: 0;
 }
 
-/* Token Node 样式 */
+/* Token Node styles */
 .token-view-wrapper {
   display: inline-block !important;
   white-space: nowrap !important;
