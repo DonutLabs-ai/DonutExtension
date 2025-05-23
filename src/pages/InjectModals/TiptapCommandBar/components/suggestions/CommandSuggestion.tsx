@@ -22,31 +22,25 @@ const CommandSuggestion = () => {
   // Use useMemo to optimize command filtering calculation, only recalculate when content changes
   const filteredCommands = useMemo(() => {
     // If input is empty or just '/', show all commands
-    if (!content || content === '/') {
-      return commands;
-    }
+    if (!content || content === '/') return commands;
 
     // If input doesn't start with '/', don't show any commands
-    if (!content.startsWith('/')) {
-      return [];
-    }
+    if (!content.startsWith('/')) return [];
 
     // Get filter query text, ignore '/' prefix, only take first word (before space)
     const queryParts = content.slice(1).split(' ');
     const query = queryParts[0].toLowerCase();
 
+    console.log(query);
+
     // If query is empty, return all commands
-    if (!query) {
-      return commands;
-    }
+    if (!query.trim()) return commands;
 
     // First try to match commands that start with the query
     const startsWithMatches = commands.filter(cmd => cmd.title.toLowerCase().startsWith(query));
 
     // If there are commands that start with the query, return these commands first
-    if (startsWithMatches.length > 0) {
-      return startsWithMatches;
-    }
+    if (startsWithMatches.length > 0) return startsWithMatches;
 
     // Otherwise, return commands that contain the query (in title or description)
     return commands.filter(
