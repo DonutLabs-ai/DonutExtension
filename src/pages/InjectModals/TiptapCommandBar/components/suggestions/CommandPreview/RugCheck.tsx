@@ -244,13 +244,8 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
           </Avatar>
 
           {/* token name */}
-          <div className="flex items-center gap-1.5">
-            <span className="font-semibold text-base text-foreground">
-              {data.tokenData.tokenName}
-            </span>
-            <span className="font-semibold text-base text-foreground">
-              ({data.tokenData.tokenSymbol})
-            </span>
+          <div className="font-semibold text-base text-foreground text-center">
+            {data.tokenData.tokenName} ({data.tokenData.tokenSymbol})
           </div>
 
           {/* token price */}

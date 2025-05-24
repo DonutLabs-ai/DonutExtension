@@ -20,6 +20,7 @@ import { useCommandParser } from '../hooks/useCommandParser';
 import { useTokenNodeHandler } from '../hooks/useTokenNodeHandler';
 import { useSuggestionHandler } from '../hooks/useSuggestionHandler';
 import { useAiSuggestion } from '../hooks/useAiSuggestion';
+import { getShadowRootContainer } from '@/entrypoints/content';
 import '../styles/tiptap-global.css';
 
 interface TiptapEditorProps {
@@ -36,6 +37,7 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
     content,
     setEditor,
     aiSuggestion,
+    isExecuting,
   } = useTiptapCommandBarStore();
 
   const { executeCurrentCommand } = useCommandExecution();
@@ -261,12 +263,58 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
     };
   }, [editor, resetStore, setEditor]);
 
+  // Handle editor disable/enable based on execution state
+  useEffect(() => {
+    if (!editor) return;
+
+    // Disable editor when executing commands
+    editor.setEditable(!isExecuting);
+  }, [editor, isExecuting]);
+
+  // Add Shadow Root level event protection
+  useEffect(() => {
+    if (!editor) return;
+
+    const shadowContainer = getShadowRootContainer();
+    if (!shadowContainer) return;
+
+    // Create protective event handler for slash key
+    const handleShadowKeyDown = (event: KeyboardEvent) => {
+      if (event.key === '/' && event.target instanceof HTMLElement) {
+        // Check if the event target is within our editor
+        const editorElement = editor.view.dom;
+        if (
+          editorElement &&
+          (editorElement.contains(event.target) || editorElement === event.target)
+        ) {
+          // Stop propagation to prevent page-level handlers from interfering
+          event.stopPropagation();
+          event.stopImmediatePropagation();
+        }
+      }
+    };
+
+    // Add event listener to shadow root with capture phase
+    shadowContainer.addEventListener('keydown', handleShadowKeyDown, {
+      capture: true,
+      passive: false,
+    });
+
+    // Cleanup
+    return () => {
+      shadowContainer.removeEventListener('keydown', handleShadowKeyDown, { capture: true });
+    };
+  }, [editor]);
+
   return (
     <div className={cn('relative w-full', className)}>
       <div className="relative">
         <EditorContent
           editor={editor}
-          className="w-full text-lg bg-transparent focus:outline-none"
+          className={cn(
+            'w-full text-lg bg-transparent outline-none transition-opacity duration-200',
+            isExecuting && 'opacity-50 pointer-events-none'
+          )}
         />
       </div>
     </div>

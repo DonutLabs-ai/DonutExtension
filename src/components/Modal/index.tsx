@@ -76,7 +76,7 @@ const Modal: React.FC<ModalProps> = ({
   const portalContainer = container || getShadowRootContainer() || document.body;
 
   const modal = (
-    <div className={cn('fixed inset-0 z-50', className)}>
+    <div className={cn('fixed inset-0 z-10', className)}>
       {/* Overlay */}
       <div
         ref={overlayRef}
@@ -87,7 +87,7 @@ const Modal: React.FC<ModalProps> = ({
       {/* Modal content */}
       <div
         className={cn(
-          'fixed top-[30%] left-[50%] w-full max-w-[calc(100%-2rem)] translate-x-[-50%]',
+          'fixed top-[30%] left-[50%] w-full max-w-[calc(100%-32px)] translate-x-[-50%]',
           'animate-in fade-in-0 zoom-in-95 duration-200',
           contentClassName
         )}

@@ -23,6 +23,9 @@ interface TiptapCommandBarState {
   // AI suggestion state
   aiSuggestion: string;
 
+  // Command execution state
+  isExecuting: boolean;
+
   // Actions
   setContent: (content: string) => void;
   setActiveSuggestion: (type: SuggestionType) => void;
@@ -32,6 +35,7 @@ interface TiptapCommandBarState {
   setParameter: (key: string, value: any) => void;
   setEditor: (editor: Editor | null) => void;
   setAiSuggestion: (suggestion: string) => void;
+  setIsExecuting: (isExecuting: boolean) => void;
   updateMultipleStates: (updates: Partial<TiptapCommandBarState>) => void;
   reset: () => void;
 }
@@ -46,6 +50,7 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
   parameters: {},
   editor: null,
   aiSuggestion: '',
+  isExecuting: false,
 
   // Actions
   setContent: content => set({ content }),
@@ -75,6 +80,8 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
 
   setAiSuggestion: suggestion => set({ aiSuggestion: suggestion }),
 
+  setIsExecuting: isExecuting => set({ isExecuting }),
+
   updateMultipleStates: updates => set(state => ({ ...state, ...updates })),
 
   reset: () =>
@@ -86,5 +93,6 @@ export const useTiptapCommandBarStore = create<TiptapCommandBarState>(set => ({
       lastSelectionCursorPos: 0,
       parameters: {},
       aiSuggestion: '',
+      isExecuting: false,
     }),
 }));

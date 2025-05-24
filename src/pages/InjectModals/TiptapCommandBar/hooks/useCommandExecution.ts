@@ -11,10 +11,16 @@ import { getDocVisualContent } from '../utils/editorUtils';
  * Custom hook for handling Tiptap command execution and result display
  */
 export const useCommandExecution = () => {
-  const [isExecuting, setIsExecuting] = useState(false);
   const toast = useToast();
-  const { parsedCommand, editor, setParsedCommand, setSelectedCommand, setActiveSuggestion } =
-    useTiptapCommandBarStore();
+  const {
+    parsedCommand,
+    editor,
+    setParsedCommand,
+    setSelectedCommand,
+    setActiveSuggestion,
+    isExecuting,
+    setIsExecuting,
+  } = useTiptapCommandBarStore();
   const { addRecord } = useCommandHistoryStore();
 
   const clearEditorContent = () => {
