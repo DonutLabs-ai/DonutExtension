@@ -183,6 +183,9 @@ importers:
       lint-staged:
         specifier: ^15.5.1
         version: 15.5.1
+      postcss-rem-to-responsive-pixel:
+        specifier: ^6.0.2
+        version: 6.0.2
       prettier:
         specifier: ^3.5.3
         version: 3.5.3
@@ -5206,6 +5209,10 @@ packages:
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
+
+  postcss-rem-to-responsive-pixel@6.0.2:
+    resolution: {integrity: sha512-Qseol4vPNC+WJIzwU7AWXGc7pjcw+7c2YRh6bwpwz/4akmtL9Zu/mZ87yeaiGuqQaBgQy45266uxIBQY+BMUfQ==}
+    engines: {node: '>=16.6.0'}
 
   postcss-resolve-nested-selector@0.1.6:
     resolution: {integrity: sha512-0sglIs9Wmkzbr8lQwEyIzlDOOC9bGmfVKcJTaxv3vMmd3uo4o4DerC3En0bnmgceeql9BfC8hRkp7cg0fjdVqw==}
@@ -13960,6 +13967,8 @@ snapshots:
   pngjs@5.0.0: {}
 
   possible-typed-array-names@1.1.0: {}
+
+  postcss-rem-to-responsive-pixel@6.0.2: {}
 
   postcss-resolve-nested-selector@0.1.6: {}
 
