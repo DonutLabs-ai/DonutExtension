@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import Modal from '@/components/Modal';
+import DynamicBorder from '@/components/DynamicBorder';
 import { getShadowRootContainer } from '@/entrypoints/content';
 import TiptapEditor from './components/TiptapEditor';
 import Suggestion from './components/suggestions';
 import { useTiptapCommandBarStore, SuggestionType } from './store/tiptapStore';
 import Logo from '@/assets/images/logo.svg?react';
+import './styles/command-bar.css';
 
 interface TiptapCommandBarProps {
   isOpen: boolean;
@@ -15,7 +17,7 @@ interface TiptapCommandBarProps {
  * Tiptap Command bar component, provides rich text editing functionality
  */
 const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) => {
-  const { reset, activeSuggestion } = useTiptapCommandBarStore();
+  const { reset, activeSuggestion, isExecuting } = useTiptapCommandBarStore();
 
   // Reset state each time TiptapCommandBar is opened
   useEffect(() => {
@@ -34,24 +36,16 @@ const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) 
       contentClassName="max-w-2xl"
       container={getShadowRootContainer()}
     >
-      <div
-        className="relative w-full rounded-[44px] p-[1px] transition-all duration-200 overflow-hidden"
-        style={{
-          background: 'linear-gradient(90deg, #0D9EFF 0%, #AF00F3 100%)',
-          boxShadow: '0px 2px 4px 0px rgba(255, 255, 255, 0.20)',
-        }}
-      >
-        <div className="bg-background rounded-[44px] overflow-hidden">
-          <div className="py-6 px-[30px] flex gap-2">
-            <Logo className="w-10 h-10 text-foreground" />
-            <div className="w-[calc(100%-48px)] mt-[6px]">
-              <TiptapEditor className="w-full" />
-            </div>
+      <DynamicBorder borderWidth={isExecuting ? 2 : 1} animated={isExecuting}>
+        <div className="py-6 px-[30px] flex gap-2">
+          <Logo className="w-10 h-10 text-foreground" />
+          <div className="w-[calc(100%-48px)] mt-[6px]">
+            <TiptapEditor className="w-full" />
           </div>
-
-          {shouldShowSuggestions && <Suggestion />}
         </div>
-      </div>
+
+        {shouldShowSuggestions && <Suggestion />}
+      </DynamicBorder>
     </Modal>
   );
 };

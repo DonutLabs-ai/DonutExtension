@@ -21,7 +21,6 @@ import { useTokenNodeHandler } from '../hooks/useTokenNodeHandler';
 import { useSuggestionHandler } from '../hooks/useSuggestionHandler';
 import { useAiSuggestion } from '../hooks/useAiSuggestion';
 import { getShadowRootContainer } from '@/entrypoints/content';
-import '../styles/tiptap-global.css';
 
 interface TiptapEditorProps {
   className?: string;
