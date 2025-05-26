@@ -1,17 +1,26 @@
 import { useState } from 'react';
 import { getTokenOperationsService } from '@/services/tokenOperationsService';
-import { useToast } from '@/components/ToastProvider';
+import { toast } from '@/components/ToastProvider';
 import { useCommandHistoryStore } from '@/stores';
 import { SuggestionType, useTiptapCommandBarStore } from '../store/tiptapStore';
 import { CommandIdType } from '../utils/commandData';
 import { enhanceParameters } from '../utils/tokenParamUtils';
 import { getDocVisualContent } from '../utils/editorUtils';
 
+const checkIsUserRejection = (errorMessage: string) => {
+  return (
+    errorMessage.includes('User rejected') ||
+    errorMessage.includes('Popup closed without action') ||
+    errorMessage.includes('canceled') ||
+    errorMessage.includes('cancelled') ||
+    errorMessage.includes('rejected')
+  );
+};
+
 /**
  * Custom hook for handling Tiptap command execution and result display
  */
 export const useCommandExecution = () => {
-  const toast = useToast();
   const {
     parsedCommand,
     editor,
@@ -33,7 +42,15 @@ export const useCommandExecution = () => {
     setActiveSuggestion(SuggestionType.None);
   };
 
-  const executeCommand = async (): Promise<{ success: boolean; message: string }> => {
+  const executeCommand = async (): Promise<{
+    success: boolean;
+    message: string;
+    description?: string;
+    action?: {
+      label: string;
+      onClick: () => void;
+    };
+  }> => {
     return new Promise(resolve => {
       if (
         !parsedCommand?.command ||
@@ -68,7 +85,11 @@ export const useCommandExecution = () => {
                 const amount = enhancedParams.amount || '';
 
                 if (!fromTokenInfo || !toTokenInfo || !amount) {
-                  resolve({ success: false, message: 'Invalid command parameters' });
+                  resolve({
+                    success: false,
+                    message: 'Swap failed',
+                    description: 'Invalid command parameters',
+                  });
                   return;
                 }
 
@@ -77,7 +98,11 @@ export const useCommandExecution = () => {
                 const toMint = typeof toTokenInfo === 'object' ? toTokenInfo.mint : null;
 
                 if (!fromMint || !toMint) {
-                  resolve({ success: false, message: 'Token mint not found' });
+                  resolve({
+                    success: false,
+                    message: 'Swap failed',
+                    description: 'Token mint not found',
+                  });
                   return;
                 }
 
@@ -91,9 +116,23 @@ export const useCommandExecution = () => {
                 // Add to history
                 addRecord(commandText, commandId);
 
-                resolve({ success: true, message: `Swap submitted. Tx: ${sig}` });
+                resolve({
+                  success: true,
+                  message: `Swap submitted`,
+                  description: `Tx: ${sig}`,
+                  action: {
+                    label: 'View',
+                    onClick: () => {
+                      window.open(`https://solscan.io/tx/${sig}`, '_blank');
+                    },
+                  },
+                });
               } catch (err: any) {
-                resolve({ success: false, message: err?.message || 'Swap failed' });
+                resolve({
+                  success: false,
+                  message: 'Swap failed',
+                  description: err?.message,
+                });
               }
             })();
             break;
@@ -107,7 +146,11 @@ export const useCommandExecution = () => {
                 const address = enhancedParams.address || '';
 
                 if (!tokenInfo || !amount || !address) {
-                  resolve({ success: false, message: 'Invalid command parameters' });
+                  resolve({
+                    success: false,
+                    message: 'Send failed',
+                    description: 'Invalid command parameters',
+                  });
                   return;
                 }
 
@@ -115,7 +158,11 @@ export const useCommandExecution = () => {
                 const mint = typeof tokenInfo === 'object' ? tokenInfo.mint : null;
 
                 if (!mint) {
-                  resolve({ success: false, message: 'Token mint not found' });
+                  resolve({
+                    success: false,
+                    message: 'Send failed',
+                    description: 'Token mint not found',
+                  });
                   return;
                 }
 
@@ -130,22 +177,34 @@ export const useCommandExecution = () => {
                 addRecord(commandText, commandId);
 
                 // Since there's no actual transaction sent here, we just display a simulated success message
-                resolve({ success: true, message: `Send submitted. Tx: ${sig}` });
+                resolve({
+                  success: true,
+                  message: `Send submitted`,
+                  description: `Tx: ${sig}`,
+                  action: {
+                    label: 'View',
+                    onClick: () => {
+                      window.open(`https://solscan.io/tx/${sig}`, '_blank');
+                    },
+                  },
+                });
               } catch (err: any) {
-                resolve({ success: false, message: err?.message || 'Send failed' });
+                resolve({
+                  success: false,
+                  message: 'Send failed',
+                  description: err?.message,
+                });
               }
             })();
             break;
           }
-          default: {
-            // Add to history
-            addRecord(commandText, commandId);
-
-            resolve({ success: true, message: `Command ${commandId} executed successfully` });
-          }
         }
       } catch (err: any) {
-        resolve({ success: false, message: err?.message || 'Command execution failed' });
+        resolve({
+          success: false,
+          message: 'Command execution failed',
+          description: err?.message,
+        });
       }
     });
   };
@@ -155,17 +214,16 @@ export const useCommandExecution = () => {
    */
   const executeCurrentCommand = async () => {
     if (!parsedCommand?.commandId) {
-      toast.push('Please enter a valid command', 'error');
+      toast.error('Please enter a valid command');
       return;
     }
 
     if (!parsedCommand.isComplete) {
-      toast.push('Command incomplete, please provide all required parameters', 'error');
+      toast.error('Command incomplete, please provide all required parameters');
       return;
     }
 
-    // No need to trigger execution event
-    if ([CommandIdType.RugCheck, CommandIdType.Chart].includes(parsedCommand.commandId)) {
+    if (![CommandIdType.Swap, CommandIdType.Send].includes(parsedCommand.commandId)) {
       return;
     }
 
@@ -175,24 +233,24 @@ export const useCommandExecution = () => {
       const result = await executeCommand();
 
       if (result.success) {
-        toast.push(result.message || 'Command executed successfully', 'success');
+        toast.success(result.message, {
+          description: result.description,
+          action: result.action,
+        });
         // Clear editor content
         clearEditorContent();
       } else {
-        throw new Error(result.message || 'Command execution failed');
+        if (checkIsUserRejection(result.description || '')) return;
+        toast.error(result.message || 'Command execution failed', {
+          description: result.description,
+        });
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      const isUserRejection =
-        errorMessage.includes('User rejected') ||
-        errorMessage.includes('Popup closed without action') ||
-        errorMessage.includes('canceled') ||
-        errorMessage.includes('cancelled') ||
-        errorMessage.includes('rejected');
-
-      if (!isUserRejection) {
-        toast.push(errorMessage, 'error');
-      }
+      if (checkIsUserRejection(errorMessage)) return;
+      toast.error('Command execution failed', {
+        description: errorMessage,
+      });
     } finally {
       setIsExecuting(false);
     }

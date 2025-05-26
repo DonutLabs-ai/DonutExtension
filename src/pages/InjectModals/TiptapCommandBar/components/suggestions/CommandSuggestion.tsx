@@ -31,8 +31,6 @@ const CommandSuggestion = () => {
     const queryParts = content.slice(1).split(' ');
     const query = queryParts[0].toLowerCase();
 
-    console.log(query);
-
     // If query is empty, return all commands
     if (!query.trim()) return commands;
 

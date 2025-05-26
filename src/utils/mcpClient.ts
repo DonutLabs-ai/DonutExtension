@@ -128,8 +128,6 @@ export class MCPClient {
       this.connected = true;
       this.initialized = true;
 
-      console.log('MCP: Connection established successfully');
-
       // Refresh available tools
       await this.refreshTools();
     } catch (error) {
@@ -152,7 +150,6 @@ export class MCPClient {
     this.sdkClient = null;
     this.initialized = false;
     this.connected = false;
-    console.log('MCP: Connection closed');
   }
 
   /**

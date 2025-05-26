@@ -67,7 +67,6 @@ class MCPService {
       this.client
         .connect()
         .then(() => {
-          console.log('MCP service connected');
           this.markActivity();
           resolve();
         })
@@ -96,7 +95,6 @@ class MCPService {
 
     // Attempt to connect if we have a server URL
     if (this.serverUrl) {
-      console.log('MCP service not connected, attempting to connect automatically');
       await this.connect(this.serverUrl);
     } else {
       throw new Error('Cannot auto-connect: No server URL provided. Call connect() first.');
@@ -131,9 +129,6 @@ class MCPService {
     const inactiveTime = Date.now() - this.lastActivityTime;
 
     if (this.client?.isConnected() && inactiveTime >= this.INACTIVITY_TIMEOUT_MS) {
-      console.log(
-        `Disconnecting MCP due to inactivity (${this.INACTIVITY_TIMEOUT_MS / 60000} minutes)`
-      );
       this.disconnect();
     }
   }

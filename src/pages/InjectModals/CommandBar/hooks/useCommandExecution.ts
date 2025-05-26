@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCommandInputStore } from '../store/commandInputStore';
-import { useToast } from '@/components/ToastProvider';
+import { toast } from '@/components/ToastProvider';
 import { getTokenOperationsService } from '@/services/tokenOperationsService';
 import { getTokens } from '@/stores/tokenStore';
 import { useCommandHistoryStore } from '@/stores';
@@ -10,7 +10,6 @@ import { useCommandHistoryStore } from '@/stores';
  */
 export const useCommandExecution = () => {
   const [isExecuting, setIsExecuting] = useState(false);
-  const toast = useToast();
 
   const { inputValue, parsedCommand, resetInput } = useCommandInputStore();
   const { addRecord } = useCommandHistoryStore();
@@ -100,12 +99,12 @@ export const useCommandExecution = () => {
   // Execute current command
   const executeCurrentCommand = async () => {
     if (!parsedCommand?.commandId) {
-      toast.push('Please enter a valid command', 'error');
+      toast.error('Please enter a valid command');
       return;
     }
 
     if (!parsedCommand.isComplete) {
-      toast.push('Command incomplete, please provide all required parameters', 'error');
+      toast.error('Command incomplete, please provide all required parameters');
       return;
     }
 
@@ -115,7 +114,7 @@ export const useCommandExecution = () => {
       const result = await executeCommand();
 
       if (result.success) {
-        toast.push(result.message || 'Command executed successfully', 'success');
+        toast.success(result.message || 'Command executed successfully');
         // Reset input after successful execution
         setTimeout(() => {
           resetInput();
@@ -135,7 +134,7 @@ export const useCommandExecution = () => {
         errorMessage.includes('rejected');
 
       if (!isUserRejection) {
-        toast.push(errorMessage, 'error');
+        toast.error(errorMessage);
       }
     } finally {
       setIsExecuting(false);

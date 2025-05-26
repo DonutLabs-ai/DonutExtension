@@ -4,9 +4,11 @@ import RugCheck from './RugCheck';
 import PriceChart from './PriceChart';
 import { useTiptapCommandBarStore } from '../../../store/tiptapStore';
 import { CommandIdType } from '../../../utils/commandData';
+import useCommandExecution from '../../../hooks/useCommandExecution';
 
 const CommandPreview = () => {
   const { parsedCommand } = useTiptapCommandBarStore();
+  const { executeCurrentCommand } = useCommandExecution();
 
   // If no parsed command or command is not complete, don't show preview
   if (!parsedCommand?.isComplete || !parsedCommand?.commandId) {
@@ -16,11 +18,11 @@ const CommandPreview = () => {
   return (
     <div className="w-full py-6 px-[30px] text-foreground">
       {parsedCommand.commandId === CommandIdType.Swap && (
-        <SwapPreview parsedCommand={parsedCommand} />
+        <SwapPreview parsedCommand={parsedCommand} executeCommand={executeCurrentCommand} />
       )}
 
       {parsedCommand.commandId === CommandIdType.Send && (
-        <SendPreview parsedCommand={parsedCommand} />
+        <SendPreview parsedCommand={parsedCommand} executeCommand={executeCurrentCommand} />
       )}
 
       {parsedCommand.commandId === CommandIdType.RugCheck && (

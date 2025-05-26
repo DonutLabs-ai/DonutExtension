@@ -1,12 +1,14 @@
 import React, { useMemo } from 'react';
+import { ellipseAddress } from '@/utils/address';
 import { ParsedCommand } from '../../../utils/commandUtils';
 import { enhanceParameters } from '../../../utils/tokenParamUtils';
 
 interface SendPreviewProps {
   parsedCommand: ParsedCommand;
+  executeCommand: () => void;
 }
 
-const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand }) => {
+const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand, executeCommand }) => {
   // Extract information from parameters
   const amount = parsedCommand.parameters?.amount || '';
   const address = parsedCommand.parameters?.address || '';
@@ -25,12 +27,15 @@ const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand }) => {
   const tokenInfo = enhancedParams.token;
   const token = tokenInfo?.symbol || parsedCommand.parameters?.token || '';
 
-  // Format address display
-  const shortAddress =
-    address.length > 12 ? `${address.slice(0, 6)}...${address.slice(-6)}` : address;
-
-  // Simulate transaction fee
-  const transactionFee = 0.001;
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        executeCommand();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [executeCommand]);
 
   return (
     <div>
@@ -86,18 +91,18 @@ const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand }) => {
         <div className="bg-muted rounded-lg p-3 w-5/12">
           <div className="text-sm text-muted-foreground mb-2">Recipient</div>
           <div className="font-medium truncate" title={address}>
-            {shortAddress}
+            {ellipseAddress(address)}
           </div>
         </div>
       </div>
 
       {/* Transaction information */}
-      <div className="flex flex-col space-y-1 mb-4 text-sm">
+      {/* <div className="flex flex-col space-y-1 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Transaction Fee</span>
-          <span className="text-foreground">{transactionFee} SOL</span>
+          <span className="text-foreground">0.001 SOL</span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

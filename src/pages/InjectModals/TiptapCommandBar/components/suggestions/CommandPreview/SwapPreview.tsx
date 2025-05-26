@@ -9,12 +9,14 @@ import { getTokenOperationsService } from '@/services/tokenOperationsService';
 import { numberIndent } from '@/utils/amount';
 import { ParsedCommand } from '../../../utils/commandUtils';
 import { enhanceParameters } from '../../../utils/tokenParamUtils';
+import { Skeleton } from '@/components/shadcn/skeleton';
 
 interface SwapPreviewProps {
   parsedCommand: ParsedCommand;
+  executeCommand: () => void;
 }
 
-const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
+const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand, executeCommand }) => {
   // Extract information from parameters
   const amount = parsedCommand.parameters?.amount || '';
 
@@ -32,8 +34,8 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
   const fromTokenInfo = enhancedParams.fromToken;
   const toTokenInfo = enhancedParams.toToken;
 
-  const [estimatedOut, setEstimatedOut] = useState<string>('');
   const [loadingQuote, setLoadingQuote] = useState(false);
+  const [estimatedOut, setEstimatedOut] = useState<string>('');
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const debouncedAmount = useDebouncedValue(amount, 400);
@@ -85,6 +87,17 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
     return () => controller.abort();
   }, [debouncedAmount, fromTokenInfo, toTokenInfo]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        if (loadingQuote || quoteError || !estimatedOut) return;
+        executeCommand();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [estimatedOut, executeCommand, loadingQuote, quoteError]);
+
   return (
     <div className="flex flex-col max-w-[540px] mx-auto">
       {quoteError && (
@@ -120,7 +133,11 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand }) => {
           <div className="text-sm text-light-blue mb-1">Buying</div>
           <div className="flex flex-col gap-2 items-end">
             <div className="text-xl flex-1 truncate">
-              {loadingQuote ? '...' : numberIndent(estimatedOut, { digits: 4 })}
+              {loadingQuote ? (
+                <Skeleton className="w-28 h-7" />
+              ) : (
+                numberIndent(estimatedOut, { digits: 4 })
+              )}
             </div>
             <div className="flex items-center gap-2 bg-accent rounded-full py-1 px-2">
               <Avatar className="w-4 h-4">

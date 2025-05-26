@@ -22,9 +22,6 @@ const Modal: React.FC<ModalProps> = ({
   contentClassName,
   container,
 }) => {
-  const modalRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
   // Close on ESC key
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -39,37 +36,6 @@ const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  // Close when clicking on the overlay
-  useEffect(() => {
-    const handleOverlayClick = (event: MouseEvent) => {
-      // Only the modal box is closed when the overlay element itself is clicked.
-      if (overlayRef.current && event.target === overlayRef.current) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleOverlayClick);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleOverlayClick);
-    };
-  }, [isOpen, onClose]);
-
-  // Prevent scrolling when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
   if (!isOpen) return null;
 
   // Use shadow root container if available, otherwise use document.body
@@ -78,11 +44,7 @@ const Modal: React.FC<ModalProps> = ({
   const modal = (
     <div className={cn('fixed inset-0 z-10', className)}>
       {/* Overlay */}
-      <div
-        ref={overlayRef}
-        className={cn('fixed inset-0 transition-opacity', overlayClassName)}
-        onClick={onClose}
-      />
+      <div className={cn('fixed inset-0 transition-opacity', overlayClassName)} onClick={onClose} />
 
       {/* Modal content */}
       <div
@@ -91,7 +53,6 @@ const Modal: React.FC<ModalProps> = ({
           'animate-in fade-in-0 zoom-in-95 duration-200',
           contentClassName
         )}
-        ref={modalRef}
         role="dialog"
         aria-modal="true"
       >
