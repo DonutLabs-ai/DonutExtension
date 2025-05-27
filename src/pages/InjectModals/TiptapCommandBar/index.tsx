@@ -38,8 +38,8 @@ const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) 
     >
       <DynamicBorder borderWidth={isExecuting ? 2 : 1} animated={isExecuting}>
         <div className="py-6 px-[30px] flex gap-2">
-          <Logo className="w-10 h-10 text-foreground" />
-          <div className="w-[calc(100%-48px)] mt-[6px]">
+          <Logo className="w-8 h-8 text-foreground" />
+          <div className="w-[calc(100%-48px)] mt-[2px]">
             <TiptapEditor className="w-full" />
           </div>
         </div>

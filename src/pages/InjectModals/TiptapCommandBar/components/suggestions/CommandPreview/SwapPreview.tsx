@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/shadcn/avatar';
 import { BigNumber } from 'bignumber.js';
-import ChevronDown from '@/assets/images/chevronDown.svg?react';
 import Exchange from '@/assets/images/exchange.svg?react';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { toRawAmount, toUiAmount } from '@/utils/amount';
@@ -118,7 +117,6 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand, executeCommand
                 <AvatarFallback>{fromTokenInfo?.symbol?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="text-sm">{fromTokenInfo?.symbol}</div>
-              <ChevronDown />
             </div>
           </div>
         </div>
@@ -145,7 +143,6 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({ parsedCommand, executeCommand
                 <AvatarFallback>{toTokenInfo?.symbol?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="text-sm">{toTokenInfo?.symbol}</div>
-              <ChevronDown />
             </div>
           </div>
         </div>
