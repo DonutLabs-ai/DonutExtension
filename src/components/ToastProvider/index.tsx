@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/shadcn/button';
-import { X, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react';
 import { cn } from '@/utils/shadcn';
+import { nanoid } from 'nanoid';
 
 interface Toast {
   id: string;
@@ -10,21 +11,38 @@ interface Toast {
   type: 'success' | 'error' | 'info' | 'warning';
   duration?: number;
   persistent?: boolean;
-  action?: {
+  animationState?: 'entering' | 'visible' | 'exiting';
+  actions?: {
     label: string;
     onClick: () => void;
-  };
+  }[];
 }
 
 interface ToastOptions {
   description?: string;
   duration?: number;
   persistent?: boolean;
-  action?: {
+  actions?: {
     label: string;
     onClick: () => void;
-  };
+  }[];
 }
+
+const TOAST_BACKGROUNDS = {
+  success: 'bg-gradient-to-r from-[#2476F0] via-[#A83DDA] to-[#C88D58]',
+  error: 'bg-destructive',
+  warning: 'bg-chart-3',
+  info: 'bg-chart-2',
+} as const;
+
+const ICON_CONFIG = {
+  success: { Icon: CheckCircle, color: 'text-green-500' },
+  error: { Icon: XCircle, color: 'text-destructive' },
+  warning: { Icon: AlertTriangle, color: 'text-yellow-500' },
+  info: { Icon: Info, color: 'text-blue-500' },
+} as const;
+
+const DEFAULT_DURATION = 3000;
 
 class ToastManager {
   private toasts: Toast[] = [];
@@ -32,7 +50,9 @@ class ToastManager {
 
   subscribe(listener: (toasts: Toast[]) => void) {
     this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
   private notify() {
@@ -40,22 +60,44 @@ class ToastManager {
   }
 
   private addToast(toast: Toast) {
-    this.toasts.push(toast);
+    const toastWithAnimation = { ...toast, animationState: 'entering' as const };
+    this.toasts.push(toastWithAnimation);
     this.notify();
+
+    setTimeout(() => {
+      const index = this.toasts.findIndex(t => t.id === toast.id);
+      if (index !== -1) {
+        this.toasts[index] = { ...this.toasts[index], animationState: 'visible' };
+        this.notify();
+      }
+    }, 50);
   }
 
   dismiss(id: string) {
-    this.toasts = this.toasts.filter(t => t.id !== id);
-    this.notify();
+    const index = this.toasts.findIndex(t => t.id === id);
+    if (index !== -1) {
+      this.toasts[index] = { ...this.toasts[index], animationState: 'exiting' };
+      this.notify();
+
+      setTimeout(() => {
+        this.toasts = this.toasts.filter(t => t.id !== id);
+        this.notify();
+      }, 200);
+    }
   }
 
   dismissAll() {
-    this.toasts = [];
+    this.toasts = this.toasts.map(toast => ({ ...toast, animationState: 'exiting' as const }));
     this.notify();
+
+    setTimeout(() => {
+      this.toasts = [];
+      this.notify();
+    }, 200);
   }
 
   private createToast(message: string, type: Toast['type'], options: ToastOptions = {}): string {
-    const id = Math.random().toString(36).substring(2);
+    const id = nanoid();
     const toast: Toast = {
       id,
       message,
@@ -63,7 +105,8 @@ class ToastManager {
       description: options.description,
       duration: options.duration,
       persistent: options.persistent,
-      action: options.action,
+      animationState: 'entering',
+      actions: options.actions,
     };
 
     this.addToast(toast);
@@ -104,56 +147,38 @@ interface ToastItemProps {
 }
 
 const ToastItem: React.FC<ToastItemProps> = ({ toast: t, onDismiss }) => {
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  const startTimer = useCallback(
-    (duration: number) => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-
-      if (isHovered) return;
-
-      timerRef.current = setTimeout(() => {
-        if (!isHovered) {
-          onDismiss(t.id);
-        }
-      }, duration);
-    },
-    [t.id, onDismiss, isHovered]
-  );
-
-  const pauseTimer = () => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (!t.persistent) {
-      const duration = t.duration || 3000;
-
-      if (timerRef.current) clearTimeout(timerRef.current);
-
-      if (!isHovered) {
+  const startTimer = useCallback(
+    (duration: number) => {
+      clearTimer();
+      if (!isHovered && !t.persistent) {
         timerRef.current = setTimeout(() => {
-          if (!isHovered) {
-            onDismiss(t.id);
-          }
+          if (!isHovered) onDismiss(t.id);
         }, duration);
       }
-    }
+    },
+    [t.id, t.persistent, onDismiss, isHovered, clearTimer]
+  );
 
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [t.id, t.persistent, t.duration, onDismiss, isHovered]);
+  useEffect(() => {
+    if (!t.persistent && t.animationState === 'visible') {
+      startTimer(t.duration || DEFAULT_DURATION);
+    }
+    return clearTimer;
+  }, [t.id, t.persistent, t.duration, t.animationState, startTimer, clearTimer]);
 
   const handleMouseEnter = () => {
     if (!t.persistent && !isHovered) {
-      pauseTimer();
+      clearTimer();
       setIsHovered(true);
     }
   };
@@ -161,78 +186,74 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast: t, onDismiss }) => {
   const handleMouseLeave = () => {
     if (!t.persistent && isHovered) {
       setIsHovered(false);
-      const duration = t.duration || 3000;
-      startTimer(duration);
+      startTimer(t.duration || DEFAULT_DURATION);
     }
   };
 
   const renderIcon = () => {
-    const iconClass = 'h-5 w-5 shrink-0';
-    switch (t.type) {
-      case 'success':
-        return <CheckCircle className={iconClass} />;
-      case 'error':
-        return <XCircle className={iconClass} />;
-      case 'warning':
-        return <AlertTriangle className={iconClass} />;
-      case 'info':
-        return <Info className={iconClass} />;
+    const config = ICON_CONFIG[t.type];
+    const { Icon, color } = config;
+    return <Icon className={`h-6 w-6 shrink-0 ${color}`} />;
+  };
+
+  const backgroundClass = TOAST_BACKGROUNDS[t.type];
+  const isSingleAction = t.actions?.length === 1;
+
+  // Animation classes based on state
+  const getAnimationClasses = () => {
+    switch (t.animationState) {
+      case 'entering':
+        return 'translate-x-full opacity-0';
+      case 'visible':
+        return 'translate-x-0 opacity-100';
+      case 'exiting':
+        return 'translate-x-full opacity-0';
       default:
-        return <Info className={iconClass} />;
+        return 'translate-x-0 opacity-100';
     }
   };
 
   return (
     <div
       className={cn(
-        'px-4 py-3 rounded-lg shadow-sm border transition-all duration-200',
-        'flex items-start gap-3 min-w-[200px] max-w-[350px]',
-        {
-          'bg-green-50 border-green-200 text-green-800': t.type === 'success',
-          'bg-red-50 border-red-200 text-red-800': t.type === 'error',
-          'bg-yellow-50 border-yellow-200 text-yellow-800': t.type === 'warning',
-          'bg-blue-50 border-blue-200 text-blue-800': t.type === 'info',
-        }
+        'w-80 rounded-2xl p-[1px] transition-all duration-300 ease-out',
+        backgroundClass,
+        getAnimationClasses()
       )}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {renderIcon()}
-
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium leading-tight truncate" title={t.message}>
-          {t.message}
+      <div className="bg-background rounded-2xl p-4 flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 shrink-0">{renderIcon()}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-foreground font-bold text-base truncate">{t.message}</div>
+            {t.description && (
+              <div className="text-muted-foreground text-sm line-clamp-2 break-all">
+                {t.description}
+              </div>
+            )}
+          </div>
         </div>
-        {t.description && (
-          <div
-            className="text-xs mt-1 opacity-80 leading-relaxed line-clamp-2"
-            title={t.description}
-          >
-            {t.description}
+
+        {t.actions && t.actions.length > 0 && (
+          <div className="grid grid-cols-2 gap-3">
+            {t.actions.map((action, index) => (
+              <Button
+                key={`${t.id}-action-${index}`}
+                variant="secondary"
+                size="sm"
+                onClick={action.onClick}
+                className={cn(
+                  'bg-card text-muted-foreground hover:bg-muted border-0 rounded-xl h-8 text-sm font-normal tracking-tight',
+                  isSingleAction && 'col-span-2'
+                )}
+              >
+                {action.label}
+              </Button>
+            ))}
           </div>
         )}
-      </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        {t.action && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={t.action.onClick}
-            className="h-7 px-3 text-xs"
-          >
-            {t.action.label}
-          </Button>
-        )}
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onDismiss(t.id)}
-          className="h-6 w-6 opacity-60 hover:opacity-100"
-        >
-          <X className="h-4 w-4" />
-        </Button>
       </div>
     </div>
   );
@@ -243,9 +264,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useEffect(() => {
     const unsubscribe = toastManager.subscribe(setToasts);
-    return () => {
-      unsubscribe();
-    };
+    return unsubscribe;
   }, []);
 
   return (
