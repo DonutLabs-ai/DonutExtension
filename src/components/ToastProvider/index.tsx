@@ -30,9 +30,9 @@ interface ToastOptions {
 
 const TOAST_BACKGROUNDS = {
   success: 'bg-gradient-to-r from-[#2476F0] via-[#A83DDA] to-[#C88D58]',
-  error: 'bg-destructive',
+  error: 'bg-chart-4',
   warning: 'bg-chart-3',
-  info: 'bg-chart-2',
+  info: 'bg-chart-1',
 } as const;
 
 const ICON_CONFIG = {

@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import { defineProxyService } from '@webext-core/proxy-service';
 import { useWalletStore } from '@/stores/walletStore';
 import { useTokenStore } from '@/stores/tokenStore';
@@ -121,7 +122,7 @@ class TokenOperationsService {
   /**
    * High-level helper: quote → build → sign+send, returns tx signature
    */
-  async executeSwap(params: QuoteParams): Promise<string> {
+  async executeSwap(params: QuoteParams): Promise<{ signature: string; outputAmount: string }> {
     // Convert human amount to raw units (integer)
     const tokens = useTokenStore.getState().tokens;
     const decimals = tokens[params.inputMint]?.decimals ?? 0;
@@ -171,7 +172,12 @@ class TokenOperationsService {
       description,
     });
 
-    return signature;
+    return {
+      signature,
+      outputAmount: BigNumber(quote.outputAmount)
+        .dividedBy(10 ** tokens[params.outputMint].decimals)
+        .toString(),
+    };
   }
 
   async buildTransfer(params: TransferParams): Promise<string> {
