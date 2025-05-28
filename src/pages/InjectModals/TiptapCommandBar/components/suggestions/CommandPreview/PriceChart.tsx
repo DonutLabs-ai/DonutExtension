@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
-import { createChart, CandlestickSeries } from 'lightweight-charts';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/shadcn/avatar';
 import getCoinGeckoService, { ChartTimePeriod } from '@/services/coinGeckoService';
-import { isAddress } from '@/utils/address';
-import { ParsedCommand } from '../../../utils/commandUtils';
 import { getMCPService } from '@/services/mcpService';
+import { isAddress } from '@/utils/address';
+import { cn } from '@/utils/shadcn';
+import { ParsedCommand } from '../../../utils/commandUtils';
+import CandlestickIcon from '../../../images/candlestick.svg?react';
+import LineIcon from '../../../images/line.svg?react';
+import { enhanceParameters } from '../../../utils/tokenParamUtils';
+
+type ChartType = 'candlestick' | 'line';
 
 interface PriceChartProps {
   parsedCommand: ParsedCommand;
@@ -15,14 +22,22 @@ const PriceChart = ({ parsedCommand }: PriceChartProps) => {
   const seriesRef = useRef<any>(null);
 
   const [tokenSymbol, setTokenSymbol] = useState<string | null>(null);
+  const [tokenIcon, setTokenIcon] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [timePeriod, setTimePeriod] = useState<ChartTimePeriod>('7d');
+  const [chartType, setChartType] = useState<ChartType>('candlestick');
 
   // Get token symbol from the parsed command
-  const getTokenSymbol = useCallback(async () => {
+  const getTokenSymbolAndIcon = useCallback(async () => {
     setTokenSymbol(null);
+    setTokenIcon(null);
+    setLoading(true);
     const token = parsedCommand.parameters?.token;
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
 
     if (isAddress(token)) {
       try {
@@ -31,44 +46,100 @@ const PriceChart = ({ parsedCommand }: PriceChartProps) => {
           token,
         });
         const text = result.content[0].text;
-        if (!text) return;
+        if (!text) {
+          setLoading(false);
+          return;
+        }
         const json = JSON.parse(text);
-        if (json.status !== 'success') return;
-        const symbol = json.supportedTokens.symbol;
+        if (json.status !== 'success') {
+          setLoading(false);
+          return;
+        }
+        const symbol = json.supportedTokens?.symbol || null;
+        const image = json.supportedTokens?.image;
+        const icon = image?.small || image?.thumb || null;
         setTokenSymbol(symbol);
+        setTokenIcon(icon);
       } catch (err) {
         setTokenSymbol(null);
+        setTokenIcon(null);
+        setLoading(false);
       }
     } else {
-      return setTokenSymbol(token);
+      const parsedParams = enhanceParameters(
+        parsedCommand.command,
+        parsedCommand.parameters || {},
+        parsedCommand.parsedParams
+      );
+      setTokenSymbol(parsedParams?.token?.symbol || null);
+      setTokenIcon(parsedParams?.token?.logoURI || null);
     }
-  }, [parsedCommand.parameters?.token]);
+  }, [parsedCommand.command, parsedCommand.parameters, parsedCommand.parsedParams]);
+
+  // Create or recreate chart series based on chart type
+  const createSeries = useCallback(() => {
+    if (!chartRef.current) return;
+
+    // Remove existing series
+    if (seriesRef.current) {
+      chartRef.current.removeSeries(seriesRef.current);
+    }
+
+    // Create new series based on chart type
+    if (chartType === 'candlestick') {
+      const candlestickSeries = chartRef.current.addSeries(CandlestickSeries, {
+        upColor: '#05d137',
+        downColor: '#f03838',
+        borderVisible: false,
+        wickUpColor: '#05d137',
+        wickDownColor: '#f03838',
+      });
+      seriesRef.current = candlestickSeries;
+    } else {
+      const lineSeries = chartRef.current.addSeries(LineSeries, {
+        color: '#05d137',
+        lineWidth: 2,
+        priceLineVisible: false,
+        lastValueVisible: true,
+      });
+      seriesRef.current = lineSeries;
+    }
+  }, [chartType]);
 
   useEffect(() => {
-    getTokenSymbol();
-  }, [getTokenSymbol]);
+    getTokenSymbolAndIcon();
+  }, [getTokenSymbolAndIcon]);
 
   useEffect(() => {
     // Create chart instance
     if (chartContainerRef.current && !chartRef.current) {
       const chart = createChart(chartContainerRef.current, {
         width: chartContainerRef.current.clientWidth,
-        height: 288,
+        height: 190,
         layout: {
-          background: { color: '#1E1E1E' },
-          textColor: '#D9D9D9',
+          background: { color: '#0e0e0e' },
+          textColor: '#ffffff',
         },
         grid: {
-          vertLines: { color: '#2E2E2E' },
-          horzLines: { color: '#2E2E2E' },
+          vertLines: { color: '#1c1c1c' },
+          horzLines: { color: '#1c1c1c' },
         },
         timeScale: {
-          borderColor: '#3C3C3C',
+          borderColor: '#1c1c1c',
           timeVisible: true,
+        },
+        rightPriceScale: {
+          borderColor: '#1c1c1c',
+          textColor: '#ffffff',
         },
         localization: {
           locale: 'en-US',
-          priceFormatter: (price: number) => price.toLocaleString('en-US'),
+          priceFormatter: (price: number) =>
+            '$' +
+            price.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 6,
+            }),
           timeFormatter: (time: number) => {
             const date = new Date(time * 1000);
             return date.toLocaleString('en-US', {
@@ -81,17 +152,7 @@ const PriceChart = ({ parsedCommand }: PriceChartProps) => {
         },
       });
 
-      // Create candlestick series
-      const candlestickSeries = chart.addSeries(CandlestickSeries, {
-        upColor: '#26a69a', // Green for price increase
-        downColor: '#ef5350', // Red for price decrease
-        borderVisible: false,
-        wickUpColor: '#26a69a',
-        wickDownColor: '#ef5350',
-      });
-
       chartRef.current = chart;
-      seriesRef.current = candlestickSeries;
 
       // Handle resize
       const handleResize = () => {
@@ -115,14 +176,21 @@ const PriceChart = ({ parsedCommand }: PriceChartProps) => {
     }
   }, []);
 
-  // Load chart data when token or time period changes
+  // Create series when chart type changes
+  useEffect(() => {
+    if (chartRef.current) {
+      createSeries();
+    }
+  }, [createSeries]);
+
+  // Load chart data when token, time period, or chart type changes
   useEffect(() => {
     const loadChartData = async () => {
-      if (!tokenSymbol) return;
+      if (!tokenSymbol || !seriesRef.current) return;
 
+      setLoading(true);
+      setError(null);
       try {
-        setError(null);
-
         // Get CoinGecko service
         const coinGeckoService = getCoinGeckoService();
 
@@ -134,63 +202,112 @@ const PriceChart = ({ parsedCommand }: PriceChartProps) => {
           return;
         }
 
-        // Get OHLC chart data
-        const ohlcData = await coinGeckoService.getCoinOHLC(coinId, 'usd', timePeriod);
+        if (chartType === 'candlestick') {
+          // Get OHLC chart data for candlestick
+          const ohlcData = await coinGeckoService.getCoinOHLC(coinId, 'usd', timePeriod);
 
-        if (ohlcData.length === 0) {
-          setError(`No chart data available for ${tokenSymbol}`);
-          return;
+          if (ohlcData.length === 0) {
+            setError(`No chart data available for ${tokenSymbol}`);
+            return;
+          }
+
+          seriesRef.current.setData(ohlcData);
+        } else {
+          // Get price data for line chart
+          const priceData = await coinGeckoService.getMarketChart(coinId, 'usd', timePeriod);
+
+          if (priceData.length === 0) {
+            setError(`No chart data available for ${tokenSymbol}`);
+            return;
+          }
+
+          // Data is already in the correct format for line series
+          seriesRef.current.setData(priceData);
         }
 
-        // Update chart with OHLC data
-        if (seriesRef.current) {
-          seriesRef.current.setData(ohlcData);
-
-          // Fit content to visible range
-          if (chartRef.current) {
-            chartRef.current.timeScale().fitContent();
-          }
+        // Fit content to visible range
+        if (chartRef.current) {
+          chartRef.current.timeScale().fitContent();
         }
       } catch (err) {
         console.error('Error loading chart data:', err);
         setError('Failed to load chart data');
+      } finally {
+        setLoading(false);
       }
     };
 
     loadChartData();
-  }, [tokenSymbol, timePeriod]);
+  }, [tokenSymbol, timePeriod, chartType]);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium">
-          {tokenSymbol ? `${tokenSymbol} Price Chart` : 'Price Chart'}
-        </h3>
+        <div className="flex items-center gap-2">
+          {tokenIcon && (
+            <Avatar className="w-6 h-6">
+              <AvatarImage src={tokenIcon} />
+              <AvatarFallback>{tokenSymbol?.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          )}
+          <div className="text-base font-semibold text-foreground">
+            {tokenSymbol ? `${tokenSymbol.toUpperCase()}` : '-'}
+          </div>
+        </div>
 
-        <div className="flex gap-2">
-          {(['1d', '7d', '30d', '90d', '365d'] as ChartTimePeriod[]).map(period => (
-            <button
-              key={period}
-              onClick={() => setTimePeriod(period)}
-              className={`px-2 py-1 text-xs rounded ${
-                timePeriod === period
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted hover:bg-muted/80'
-              }`}
-            >
-              {period}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {/* Time Period Buttons */}
+          <div className="flex gap-1">
+            {(['1d', '7d', '30d', '90d'] as ChartTimePeriod[]).map(period => (
+              <button
+                key={period}
+                onClick={() => setTimePeriod(period)}
+                className={cn(
+                  'px-4 text-sm rounded-2xl transition-all font-semibold bg-card hover:bg-card/80 cursor-pointer h-8 flex items-center',
+                  timePeriod === period ? 'text-primary' : 'text-card-foreground'
+                )}
+              >
+                {period}
+              </button>
+            ))}
+          </div>
+
+          {/* Chart Type Toggle */}
+          <div className="flex items-center bg-card rounded-2xl px-[6px] h-8 gap-1">
+            <CandlestickIcon
+              className={cn(
+                'w-7 h-7 cursor-pointer',
+                chartType === 'candlestick' ? 'text-primary' : 'text-card-foreground'
+              )}
+              onClick={() => setChartType('candlestick')}
+            />
+            <LineIcon
+              className={cn(
+                'w-7 h-7 cursor-pointer',
+                chartType === 'line' ? 'text-primary' : 'text-card-foreground'
+              )}
+              onClick={() => setChartType('line')}
+            />
+          </div>
         </div>
       </div>
 
       <div
         ref={chartContainerRef}
-        className="w-full h-72 bg-card rounded-md overflow-hidden relative"
+        className="w-full h-[190px] bg-background rounded-md overflow-hidden relative border border-border"
       >
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="text-foreground text-sm bg-card px-4 py-2 rounded border border-border">
+              Loading chart data...
+            </div>
+          </div>
+        )}
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-destructive text-sm">{error}</div>
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="text-destructive text-sm bg-card px-4 py-2 rounded border border-border">
+              {error}
+            </div>
           </div>
         )}
       </div>

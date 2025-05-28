@@ -154,7 +154,7 @@ export const useCommandExecution = () => {
 
         const { fromToken, toToken, amount } = enhancedParams;
         const tokenOperationsService = getTokenOperationsService();
-        const sig = await tokenOperationsService.executeSwap({
+        const { signature, outputAmount } = await tokenOperationsService.executeSwap({
           inputMint: fromToken!.mint,
           outputMint: toToken!.mint,
           amount: amount!,
@@ -165,9 +165,9 @@ export const useCommandExecution = () => {
         return {
           success: true,
           message: 'Swap submitted',
-          description: `Tx: ${sig}`,
+          description: `${amount} ${fromToken!.symbol} → ${outputAmount} ${toToken!.symbol}`,
           actions: [
-            createViewTransactionAction(sig),
+            createViewTransactionAction(signature),
             createRetryAction(
               executeSwapOperation,
               enhancedParams,
@@ -226,7 +226,7 @@ export const useCommandExecution = () => {
         return {
           success: true,
           message: 'Send submitted',
-          description: `Tx: ${sig}`,
+          description: `${amount} ${token!.symbol} → ${address}`,
           actions: [
             createViewTransactionAction(sig),
             createRetryAction(
