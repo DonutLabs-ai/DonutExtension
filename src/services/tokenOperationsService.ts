@@ -5,6 +5,7 @@ import { useTokenStore } from '@/stores/tokenStore';
 import { toRawAmount } from '@/utils/amount';
 import { getPopupEventService } from '@/services/popupEventService';
 import { getMCPService } from './mcpService';
+import { estimateGasByRawTx } from '@/utils/transaction';
 
 const QUOTE_CACHE_TTL = 8_000; // 8s
 const MAX_RETRIES = 2;
@@ -246,6 +247,11 @@ class TokenOperationsService {
     });
 
     return signature;
+  }
+
+  async estimateTransfer(params: TransferParams) {
+    const txStr = await this.buildTransfer(params);
+    return estimateGasByRawTx(txStr);
   }
 }
 

@@ -71,7 +71,7 @@ class TokenService {
         );
 
         // Take top 50 tokens and normalize to TokenInfo
-        const topTokens = data.slice(0, 50).map(
+        const topTokens = data.slice(0, 100).map(
           (t: JupiterToken): TokenInfo => ({
             mint: t.address,
             symbol: t.symbol,

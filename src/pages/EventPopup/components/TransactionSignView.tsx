@@ -4,15 +4,7 @@ import { TransactionSignData } from '@/services/popupEventService';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
 import { SolanaWallet } from '@web3auth/solana-provider';
 import { Transaction, VersionedTransaction } from '@solana/web3.js';
-
-export function checkVersionedTransaction(txBuffer: Buffer) {
-  try {
-    VersionedTransaction.deserialize(txBuffer);
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
+import { checkVersionedTransaction } from '@/utils/transaction';
 
 interface TransactionSignViewProps {
   event: PopupEvent;

@@ -1,8 +1,10 @@
 import { Button } from '@/components/shadcn/button';
 import { useWeb3Auth } from '@web3auth/modal-react-hooks';
+import { SolanaWallet } from '@web3auth/solana-provider';
 
 const Web3AuthTest = () => {
   const { isConnected, userInfo, connect, logout, provider } = useWeb3Auth();
+  const [privateKey, setPrivateKey] = useState<string | null>(null);
 
   const handleConnect = async () => {
     try {
@@ -18,6 +20,15 @@ const Web3AuthTest = () => {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleExportPrivateKey = async () => {
+    if (!provider) return;
+    const wallet = new SolanaWallet(provider);
+    const privateKey = await wallet.request({
+      method: 'solanaPrivateKey',
+    });
+    setPrivateKey(privateKey as string);
   };
 
   return (
@@ -70,8 +81,18 @@ const Web3AuthTest = () => {
                   </span>
                 </div>
               )}
+              {privateKey && (
+                <div className="flex justify-between">
+                  <span className="text-xs text-muted-foreground shrink-0 mr-4">Private Key</span>
+                  <span className="text-xs font-medium break-all">{privateKey}</span>
+                </div>
+              )}
             </div>
           </div>
+
+          <Button className="mr-4" onClick={handleExportPrivateKey}>
+            Export privatekey
+          </Button>
 
           <Button variant="destructive" onClick={handleLogout}>
             Logout

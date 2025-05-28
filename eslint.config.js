@@ -43,6 +43,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/prefer-for-of': 'off',
+      '@typescript-eslint/dot-notation': 'off',
     },
   }
 );

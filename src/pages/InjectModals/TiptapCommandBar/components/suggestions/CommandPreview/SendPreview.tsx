@@ -1,7 +1,14 @@
-import React, { useMemo } from 'react';
-import { ellipseAddress } from '@/utils/address';
+import React, { useMemo, useEffect, useState } from 'react';
+import BigNumber from 'bignumber.js';
+import { useWalletStore } from '@/stores';
 import { ParsedCommand } from '../../../utils/commandUtils';
 import { enhanceParameters } from '../../../utils/tokenParamUtils';
+import { numberIndent } from '@/utils/amount';
+import logo from '@/assets/images/logo.png';
+import WalletIcon from '../../../images/wallet.svg?react';
+import QrCodeIcon from '../../../images/qrCode.svg?react';
+import { getTokenOperationsService } from '@/services/tokenOperationsService';
+import { useTokenStore } from '@/stores/tokenStore';
 
 interface SendPreviewProps {
   parsedCommand: ParsedCommand;
@@ -9,6 +16,10 @@ interface SendPreviewProps {
 }
 
 const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand, executeCommand }) => {
+  const [gasFee, setGasFee] = useState<string>();
+  const currentWalletAddr = useWalletStore(state => state.address);
+  const tokens = useTokenStore(state => state.tokens);
+
   // Extract information from parameters
   const amount = parsedCommand.parameters?.amount || '';
   const address = parsedCommand.parameters?.address || '';
@@ -27,6 +38,35 @@ const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand, executeCommand
   const tokenInfo = enhancedParams.token;
   const token = tokenInfo?.symbol || parsedCommand.parameters?.token || '';
 
+  const tokenPrice = useMemo(() => {
+    if (!tokenInfo?.price || !amount) return null;
+    return new BigNumber(tokenInfo.price).multipliedBy(amount).toFixed();
+  }, [tokenInfo, amount]);
+
+  const gasPrice = useMemo(() => {
+    const solPrice = tokens['So11111111111111111111111111111111111111112']?.price;
+    if (!solPrice || !gasFee) return null;
+    return new BigNumber(solPrice).multipliedBy(gasFee).toFixed();
+  }, [gasFee, tokens]);
+
+  useEffect(() => {
+    const estimateGas = async () => {
+      if (!amount || !address || !tokenInfo) return;
+      const tokenOperationsService = getTokenOperationsService();
+      const gasFee = await tokenOperationsService.estimateTransfer({
+        from: currentWalletAddr || address,
+        to: address,
+        amount: Number(amount),
+        mint: tokenInfo.mint,
+      });
+      setGasFee(gasFee);
+    };
+    const timer = setTimeout(() => {
+      estimateGas();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [amount, address, tokenInfo, currentWalletAddr]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Enter' && !event.shiftKey) {
@@ -38,57 +78,50 @@ const SendPreview: React.FC<SendPreviewProps> = ({ parsedCommand, executeCommand
   }, [executeCommand]);
 
   return (
-    <div>
-      <div className="text-sm font-medium text-foreground mb-3">Send Preview</div>
-      {/* Transaction area */}
-      <div className="flex items-center justify-between mb-4">
-        {/* Sending area */}
-        <div className="bg-muted rounded-lg p-3 w-5/12">
-          <div className="text-sm text-muted-foreground mb-2">Sending</div>
-          <div className="flex items-center justify-between">
-            <div className="text-xl font-medium">{amount}</div>
-            <div className="flex items-center space-x-1 bg-secondary rounded-full py-1 px-2 w-fit">
-              <span className="font-medium">{token}</span>
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-col">
+      <div className="text-base font-semibold text-foreground mb-4">Send Preview</div>
 
-        {/* Send icon */}
-        <div className="flex-shrink-0">
-          <div className="w-6 h-6 mx-auto text-muted-foreground">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </div>
+      <div className="flex items-center">
+        <WalletIcon className="size-7 shrink-0 mr-4" />
+        <div className="flex items-center gap-2">
+          <div className="text-sm text-muted-foreground">From</div>
+          <img src={logo} alt="Donut" className="size-5" />
+          <div className="text-sm text-foreground">Donut Wallet</div>
         </div>
+      </div>
 
-        {/* Recipient area */}
-        <div className="bg-muted rounded-lg p-3 w-5/12">
-          <div className="text-sm text-muted-foreground mb-2">Recipient</div>
-          <div className="font-medium truncate" title={address}>
-            {ellipseAddress(address)}
+      <div className="border-l border-accent-foreground w-px h-3 ml-[13px]"></div>
+
+      <div className="flex items-center">
+        <QrCodeIcon className="size-7 shrink-0 mr-4" />
+        <div className="flex items-center gap-2">
+          <div className="text-sm text-muted-foreground">To</div>
+          <div className="text-sm text-foreground break-all line-clamp-1" title={address}>
+            {address}
           </div>
         </div>
       </div>
 
-      {/* Transaction information */}
-      {/* <div className="flex flex-col space-y-1 text-sm">
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">Transaction Fee</span>
-          <span className="text-foreground">0.001 SOL</span>
+      <div className="border-t border-border pt-3 mt-4 text-sm">
+        <div className="flex items-center">
+          <span className="text-muted-foreground w-40">Amount</span>
+          <span className="text-foreground">
+            {numberIndent(amount)} {token}
+          </span>
+          {!!tokenPrice && (
+            <span className="text-muted-foreground ml-2">(${numberIndent(tokenPrice)})</span>
+          )}
         </div>
-      </div> */}
+        {!!gasFee && (
+          <div className="flex items-center mt-2">
+            <span className="text-muted-foreground w-40">Network Fees</span>
+            <span className="text-foreground">{gasFee} SOL</span>
+            {!!gasPrice && (
+              <span className="text-muted-foreground ml-2">(${numberIndent(gasPrice)})</span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
