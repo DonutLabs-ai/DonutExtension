@@ -146,15 +146,18 @@
 
 /* Token Node styles */
 .token-view-wrapper {
-  display: inline-block !important;
+  display: inline-flex !important;
+  align-items: center !important;
   white-space: nowrap !important;
   user-select: all !important;
   cursor: default !important;
+  position: relative;
+  bottom: 2px;
 }
 
 .token-view {
-  display: inline-flex;
-  align-items: center;
+  display: inline-flex !important;
+  align-items: center !important;
   background-color: var(--card) !important;
   border-radius: 999px !important;
   height: 28px !important;

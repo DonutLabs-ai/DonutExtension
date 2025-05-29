@@ -1,56 +1,55 @@
 import React from 'react';
 import { NodeViewProps, NodeViewWrapper } from '@tiptap/react';
-import { cn } from '@/utils/shadcn';
 import { useTokenStore } from '@/stores/tokenStore';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/shadcn/avatar';
 
-// 从NodeViewProps中提取我们需要的属性
+// Extract the properties we need from NodeViewProps
 const TokenView: React.FC<NodeViewProps> = props => {
-  // 从节点属性中获取token信息
+  // Get token information from node attributes
   const symbol = props.node.attrs.symbol as string;
   const mint = props.node.attrs.mint as string;
 
-  // 从token store获取token列表
+  // Get token list from token store
   const tokens = useTokenStore(state => state.tokens);
 
-  // 首先尝试使用mint查找token（最准确的方式）
-  // 如果mint不存在或找不到对应token，再使用symbol查找
+  // First try to find token using mint (most accurate method)
+  // If mint doesn't exist or no corresponding token is found, then use symbol to search
   const token = mint
     ? tokens[mint] || Object.values(tokens).find(t => t.mint === mint)
     : Object.values(tokens).find(t => t.symbol.toLowerCase() === symbol.toLowerCase());
 
-  // 通用样式，确保节点始终内联显示且不带换行
+  // Common styles to ensure the node is always displayed inline without line breaks
   const wrapperStyle: React.CSSProperties = {
-    display: 'inline', // 使用inline确保不会产生额外的块元素行为
+    display: 'inline', // Use inline to ensure no additional block element behavior
     whiteSpace: 'nowrap',
     userSelect: 'all',
-    verticalAlign: 'middle', // 保持与文本对齐
-    position: 'relative', // 用于正确定位
-    lineHeight: 'normal', // 防止继承过大的行高
-    font: 'inherit', // 继承父元素字体设置
-    wordSpacing: 'normal', // 确保单词间距正常
+    verticalAlign: 'middle', // Keep aligned with text
+    position: 'relative', // For proper positioning
+    lineHeight: 'normal', // Prevent inheriting excessive line height
+    font: 'inherit', // Inherit parent element font settings
+    wordSpacing: 'normal', // Ensure normal word spacing
   };
 
-  // Token显示容器的基本样式
+  // Basic styles for token display container
   const tokenStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 255, 0.1)',
     borderRadius: '6px',
     padding: '2px 6px',
-    margin: '0', // 移除额外间距，由非断行空格控制
+    margin: '0', // Remove extra spacing, controlled by non-breaking spaces
     border: '1px solid rgba(0, 0, 255, 0.2)',
     position: 'relative',
-    zIndex: 1, // 确保在文本之上
-    whiteSpace: 'nowrap', // 防止内部换行
+    zIndex: 1, // Ensure it's above text
+    whiteSpace: 'nowrap', // Prevent internal line breaks
   };
 
-  // 确保所有空格使用非断行空格，防止意外换行
+  // Ensure all spaces use non-breaking spaces to prevent unexpected line breaks
   const formatWithNbsp = (text: string) => {
     return text.replace(/ /g, '\u00A0');
   };
 
-  // 如果找不到token，显示基本样式
+  // If token is not found, display basic style
   if (!token) {
     return (
       <NodeViewWrapper
@@ -62,7 +61,7 @@ const TokenView: React.FC<NodeViewProps> = props => {
         <span
           className="token-view"
           style={tokenStyle}
-          contentEditable={false} // 确保内容不可编辑
+          contentEditable={false} // Ensure content is not editable
         >
           {formatWithNbsp(symbol)}
         </span>
@@ -70,7 +69,7 @@ const TokenView: React.FC<NodeViewProps> = props => {
     );
   }
 
-  // 如果找到token，显示完整样式（带图标）
+  // If token is found, display complete style (with icon)
   return (
     <NodeViewWrapper
       className="token-view-wrapper"
@@ -84,28 +83,20 @@ const TokenView: React.FC<NodeViewProps> = props => {
           ...tokenStyle,
           gap: '4px',
         }}
-        contentEditable={false} // 确保内容不可编辑
+        contentEditable={false} // Ensure content is not editable
       >
-        <Avatar
-          className="token-avatar"
-          style={{
-            width: '16px',
-            height: '16px',
-            fontSize: '10px',
-            flexShrink: 0, // 防止图标缩小
-          }}
-        >
+        <Avatar className="token-avatar">
           <AvatarImage src={token.logoURI} alt={formatWithNbsp(token.symbol)} />
-          <AvatarFallback>{token.symbol.charAt(0)}</AvatarFallback>
+          <AvatarFallback className="text-xs">{token.symbol.charAt(0)}</AvatarFallback>
         </Avatar>
         <span
           className="token-symbol"
           style={{
             fontWeight: 500,
             color: 'hsl(var(--primary))',
-            lineHeight: 1, // 确保没有额外行高
-            overflow: 'visible', // 防止文本截断
-            whiteSpace: 'nowrap', // 防止内部换行
+            lineHeight: 1, // Ensure no extra line height
+            overflow: 'visible', // Prevent text truncation
+            whiteSpace: 'nowrap', // Prevent internal line breaks
           }}
         >
           {formatWithNbsp(token.symbol)}

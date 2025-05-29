@@ -11,20 +11,18 @@ export interface TokenNodeOptions {
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
     tokenNode: {
-      /**
-       * 添加一个token节点
-       */
+      // Add a token node
       setTokenNode: (attributes: { symbol: string; mint: string }) => ReturnType;
     };
   }
 }
 
-// 添加静态助手方法来检查节点是否是token节点
+// Add static helper methods to check if a node is a token node
 export const isTokenNode = (node: any): boolean => {
   return node?.type?.name === 'tokenNode';
 };
 
-// 从token节点中获取symbol值
+// Get symbol value from token node
 export const getTokenSymbol = (node: any): string | null => {
   if (isTokenNode(node)) {
     return node.attrs?.symbol || null;
@@ -32,7 +30,7 @@ export const getTokenSymbol = (node: any): string | null => {
   return null;
 };
 
-// 从token节点中获取mint值（唯一标识符）
+// Get mint value (unique identifier) from token node
 export const getTokenMint = (node: any): string | null => {
   if (isTokenNode(node)) {
     return node.attrs?.mint || null;
@@ -40,9 +38,7 @@ export const getTokenMint = (node: any): string | null => {
   return null;
 };
 
-/**
- * 获取token节点对应的完整TokenInfo
- */
+// Get the complete TokenInfo corresponding to the token node
 export const getTokenInfo = (node: any): TokenInfo | null => {
   if (!isTokenNode(node)) return null;
 
@@ -51,16 +47,16 @@ export const getTokenInfo = (node: any): TokenInfo | null => {
 
   if (!mint && !symbol) return null;
 
-  // 从store中获取最新的tokens数据
+  // Get the latest tokens data from store
   const tokens = useTokenStore.getState().tokens;
 
-  // 优先使用mint查找（精确匹配）
+  // Prioritize mint lookup (exact match)
   if (mint) {
     const tokenByMint = tokens[mint] || Object.values(tokens).find(t => t.mint === mint);
     if (tokenByMint) return tokenByMint;
   }
 
-  // 回退到使用symbol查找（可能有多个token共享同一个symbol）
+  // Fall back to symbol lookup (multiple tokens may share the same symbol)
   if (symbol) {
     return Object.values(tokens).find(t => t.symbol.toLowerCase() === symbol.toLowerCase()) || null;
   }
@@ -75,16 +71,19 @@ export const TokenNode = Node.create<TokenNodeOptions>({
 
   inline: true,
 
-  atom: true, // 不可分割的单元
+  // Indivisible unit
+  atom: true,
 
-  selectable: true, // 确保节点可以被选择
+  // Ensure the node can be selected
+  selectable: true,
 
-  draggable: false, // 禁用拖拽以避免意外移动
+  // Disable dragging to avoid accidental movement
+  draggable: false,
 
-  // 防止插入空白字符
+  // Prevent insertion of whitespace characters
   isolating: false,
 
-  // 允许将光标放在节点前后
+  // Allow cursor to be placed before and after the node
   allowGapCursor: true,
 
   addOptions() {
@@ -140,7 +139,7 @@ export const TokenNode = Node.create<TokenNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    // 优先使用mint地址查找token，如果找不到再使用symbol
+    // Prioritize mint address lookup for token, fall back to symbol if not found
     const token = HTMLAttributes.mint
       ? useTokenStore.getState().tokens[HTMLAttributes.mint] ||
         Object.values(useTokenStore.getState().tokens).find(t => t.mint === HTMLAttributes.mint)
@@ -156,7 +155,7 @@ export const TokenNode = Node.create<TokenNodeOptions>({
         'data-token-node': '',
         'data-mint': HTMLAttributes.mint || '',
         class: 'token-node',
-        contenteditable: 'false', // 确保内容不可编辑
+        contenteditable: 'false',
       }),
       displayName,
     ];

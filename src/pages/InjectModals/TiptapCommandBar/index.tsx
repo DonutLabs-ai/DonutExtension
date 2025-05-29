@@ -33,7 +33,7 @@ const TiptapCommandBar: React.FC<TiptapCommandBarProps> = ({ isOpen, onClose }) 
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      contentClassName="max-w-2xl"
+      contentClassName="max-w-3xl"
       container={getShadowRootContainer()}
     >
       <DynamicBorder borderWidth={isExecuting ? 2 : 1} animated={isExecuting}>
