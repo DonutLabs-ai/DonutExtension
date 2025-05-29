@@ -111,7 +111,7 @@ const CommandSuggestion = () => {
       startsWithSlash: true,
       commandId: command.id,
       command: command,
-      isComplete: command.params.length === 0, // Only consider complete if there are no parameters
+      isComplete: command.params.filter(param => param.required).length === 0, // Only consider complete if all required parameters are filled
       parameters: emptyParams,
       parsedParams: {}, // Add empty parsedParams object
       commandConfirmed: true, // Force set command as confirmed (since selected from menu)
@@ -121,9 +121,11 @@ const CommandSuggestion = () => {
 
   // Determine next suggestion type
   const determineNextSuggestionType = useCallback((command: CommandOption): SuggestionType => {
-    if (command.params.length === 0) {
-      // Commands without parameters don't need suggestions
-      return SuggestionType.None;
+    if (
+      command.params.length === 0 ||
+      command.params.filter(param => param.required).length === 0
+    ) {
+      return SuggestionType.Preview;
     }
 
     // If first parameter is Token type, immediately show Token suggestion
@@ -159,9 +161,7 @@ const CommandSuggestion = () => {
 
         // Insert command into editor
         const inserted = insertCommandInEditor(command, editor);
-        if (!inserted) {
-          return;
-        }
+        if (!inserted) return;
 
         // Create parsed command object
         const newParsedCommand = createParsedCommand(command);

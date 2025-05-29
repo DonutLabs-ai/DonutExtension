@@ -18,6 +18,7 @@ export interface TokenInfo {
 
 interface TokenStoreState {
   tokens: Record<string, TokenInfo>; // key by mint address
+  priceWatchList: string[]; // array of mint addresses that user is watching
   lastUpdated: {
     list: number;
     balance: number;
@@ -27,11 +28,22 @@ interface TokenStoreState {
   setTokens: (list: TokenInfo[]) => void;
   updateBalances: (map: Partial<Record<string, { balance: string; uiBalance: number }>>) => void;
   updatePrices: (map: Partial<Record<string, string>>) => void;
+  // watchList actions
+  addToWatchList: (mint: string) => void;
+  removeFromWatchList: (mint: string) => void;
+  toggleWatchList: (mint: string) => void;
+  isInWatchList: (mint: string) => boolean;
 }
 
 // Create base zustand store
-export const useTokenStore = create<TokenStoreState>(set => ({
+export const useTokenStore = create<TokenStoreState>((set, get) => ({
   tokens: {},
+  priceWatchList: [
+    'SonicxvLud67EceaEzCLRnMTBqzYUUYNr93DBkBdDES', // SONIC
+    'So11111111111111111111111111111111111111112', // SOL
+    '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh', // BTC
+    '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs', // ETH
+  ],
   lastUpdated: {
     list: 0,
     balance: 0,
@@ -46,7 +58,7 @@ export const useTokenStore = create<TokenStoreState>(set => ({
     set({
       tokens: tokensMap,
       lastUpdated: {
-        ...useTokenStore.getState().lastUpdated,
+        ...get().lastUpdated,
         list: Date.now(),
       },
     });
@@ -94,6 +106,38 @@ export const useTokenStore = create<TokenStoreState>(set => ({
         },
       };
     });
+  },
+  // Watchlist management methods
+  addToWatchList: mint => {
+    set(state => {
+      if (!state.priceWatchList.includes(mint)) {
+        return {
+          priceWatchList: [mint, ...state.priceWatchList],
+        };
+      }
+      return state;
+    });
+  },
+  removeFromWatchList: mint => {
+    set(state => ({
+      priceWatchList: state.priceWatchList.filter(m => m !== mint),
+    }));
+  },
+  toggleWatchList: mint => {
+    set(state => {
+      if (state.priceWatchList.includes(mint)) {
+        return {
+          priceWatchList: state.priceWatchList.filter(m => m !== mint),
+        };
+      } else {
+        return {
+          priceWatchList: [mint, ...state.priceWatchList],
+        };
+      }
+    });
+  },
+  isInWatchList: (mint: string): boolean => {
+    return get().priceWatchList.includes(mint);
   },
 }));
 

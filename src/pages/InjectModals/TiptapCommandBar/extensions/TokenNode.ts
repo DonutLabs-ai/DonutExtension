@@ -98,9 +98,7 @@ export const TokenNode = Node.create<TokenNodeOptions>({
         default: null,
         parseHTML: element => element.getAttribute('data-symbol'),
         renderHTML: attributes => {
-          if (!attributes.symbol) {
-            return {};
-          }
+          if (!attributes.symbol) return {};
 
           return {
             'data-symbol': attributes.symbol,

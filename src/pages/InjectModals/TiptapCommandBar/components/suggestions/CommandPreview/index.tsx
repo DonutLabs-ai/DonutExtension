@@ -2,6 +2,7 @@ import SwapPreview from './SwapPreview';
 import SendPreview from './SendPreview';
 import RugCheck from './RugCheck';
 import PriceChart from './PriceChart';
+import TokenPrice from './TokenPrice';
 import { useTiptapCommandBarStore } from '../../../store/tiptapStore';
 import { CommandIdType } from '../../../utils/commandData';
 import useCommandExecution from '../../../hooks/useCommandExecution';
@@ -28,6 +29,8 @@ const CommandPreview = () => {
       {parsedCommand.commandId === CommandIdType.RugCheck && (
         <RugCheck parsedCommand={parsedCommand} />
       )}
+
+      {parsedCommand.commandId === CommandIdType.Price && <TokenPrice />}
 
       {parsedCommand.commandId === CommandIdType.Chart && (
         <PriceChart parsedCommand={parsedCommand} />

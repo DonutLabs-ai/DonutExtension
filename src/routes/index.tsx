@@ -7,7 +7,7 @@ const MCPDemo = lazy(() => import('@/pages/MCPDemo'));
 
 const Router = () => (
   <Routes>
-    <Route path="/" element={<Web3AuthTest />} />
+    <Route path="/" element={<MCPDemo />} />
     <Route path="/event" element={<EventPopup />} />
     <Route path="/mcp" element={<MCPDemo />} />
   </Routes>

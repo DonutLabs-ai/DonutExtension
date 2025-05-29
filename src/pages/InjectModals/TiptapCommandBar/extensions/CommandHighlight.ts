@@ -29,7 +29,7 @@ function findCommandPosition(
   }
 
   const commandText = `/${parsedCommand.command.title}`;
-  const commandStart = text.indexOf(commandText);
+  const commandStart = text.toLowerCase().indexOf(commandText.toLowerCase());
 
   if (commandStart === -1) return null;
 

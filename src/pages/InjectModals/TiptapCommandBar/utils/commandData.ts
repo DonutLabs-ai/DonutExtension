@@ -5,6 +5,7 @@ import logo from '@/assets/images/logo.png';
 export enum CommandIdType {
   Swap = 'swap',
   Send = 'send',
+  Price = 'price',
   Chart = 'chart',
   RugCheck = 'rugCheck',
 }
@@ -90,6 +91,20 @@ export const commands: CommandOption[] = [
         type: ParamType.Address,
         required: true,
         placeholder: 'Recipient address',
+      },
+    ],
+  },
+  {
+    id: CommandIdType.Price,
+    icon: logo,
+    title: 'Price',
+    description: 'Show token price',
+    params: [
+      {
+        id: 'token',
+        name: 'Token',
+        type: ParamType.Text,
+        required: false,
       },
     ],
   },

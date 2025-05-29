@@ -130,7 +130,7 @@ export function parseCommandFromText(
       startsWithSlash,
       commandId: matchedCommand.id,
       command: matchedCommand,
-      isComplete: matchedCommand.params.length === 0, // If no parameters, consider complete
+      isComplete: false,
       parameters: {},
       parsedParams: {},
       commandConfirmed: false,
