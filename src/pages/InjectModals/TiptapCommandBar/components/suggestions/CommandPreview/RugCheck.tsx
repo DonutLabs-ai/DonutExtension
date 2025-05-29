@@ -243,7 +243,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
 
           {/* token name */}
           <div className="font-semibold text-base text-foreground text-center">
-            {data.tokenData.tokenName} ({data.tokenData.tokenSymbol})
+            {data.tokenData.tokenName} ${data.tokenData.tokenSymbol}
           </div>
 
           {/* token price */}
