@@ -78,57 +78,57 @@ interface RugCheckProps {
  */
 const RugCheckSkeleton = () => {
   return (
-    <div className="max-w-[670px] mx-auto">
-      {/* single grid layout for all sections */}
-      <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 md:gap-6 auto-rows-auto">
+    <div className="-mt-6 grid grid-cols-1 md:grid-cols-[2fr_3fr]">
+      <div className="flex flex-col items-center">
         {/* token info and price skeleton */}
-        <div className="flex flex-col justify-center items-center gap-3 border border-border rounded-2xl p-4">
+        <div className="flex flex-col justify-center items-center gap-2 pt-8 pb-4 md:pr-7">
           {/* token icon skeleton */}
           <Skeleton className="w-12 h-12 rounded-full" />
 
           {/* token name skeleton */}
-          <div className="flex items-center gap-1.5">
-            <Skeleton className="w-20 h-5" />
-            <Skeleton className="w-10 h-5" />
-          </div>
+          <Skeleton className="w-32 h-4" />
 
           {/* token price skeleton */}
-          <Skeleton className="w-16 h-7" />
+          <Skeleton className="w-20 h-6" />
         </div>
 
         {/* statistics skeleton */}
-        <div className="flex flex-col gap-3 border border-border rounded-2xl p-4 justify-center">
+        <div className="w-full flex flex-col gap-2.5 justify-center py-4 md:pr-7">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="flex justify-between items-center">
-              <Skeleton className="w-16 h-5" />
-              <Skeleton className="w-32 h-5" />
+            <div key={index} className="flex justify-between items-center gap-2">
+              <Skeleton className="w-16 h-3.5" />
+              <Skeleton className="w-24 h-3.5" />
             </div>
           ))}
         </div>
+      </div>
 
+      <div className="flex flex-col md:border-l border-border">
         {/* security audit skeleton */}
-        <div className="border border-border rounded-2xl p-4 md:p-5 mt-4 md:mt-0">
-          <Skeleton className="w-14 h-5 mb-4" />
+        <div className="py-4 md:pl-7 h-max">
+          <Skeleton className="w-12 h-3.5 mb-3.5" />
           <div className="flex flex-col gap-3">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="flex gap-2 items-center">
                 <Skeleton className="w-5 h-5 flex-shrink-0 rounded-full" />
-                <Skeleton className="w-32 h-5" />
+                <Skeleton className="w-20 h-3.5" />
               </div>
             ))}
           </div>
         </div>
 
         {/* risk assessment skeleton */}
-        <div className="border border-border rounded-2xl p-4 mt-4 md:mt-0">
-          <div className="flex justify-between items-center mb-4">
-            <Skeleton className="w-20 h-5" />
-            <Skeleton className="w-16 h-4" />
+        <div className="py-4 md:pl-7 h-max md:border-t border-border">
+          <div className="flex justify-between items-center mb-3">
+            <Skeleton className="w-16 h-3.5" />
+            <Skeleton className="w-12 h-3.5" />
           </div>
-          <div className="flex items-center gap-4">
-            <Skeleton className="w-16 h-8 rounded" />
-            <Skeleton className="w-40 h-5" />
-          </div>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="flex gap-4 mt-3">
+              <Skeleton className="w-16 h-6 rounded" />
+              <Skeleton className="w-32 h-3.5 mt-0.5" />
+            </div>
+          ))}
         </div>
       </div>
     </div>
@@ -144,7 +144,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
   const [data, setData] = useState<RugCheckResponse | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const getTokenAddress = useCallback(async () => {
+  const tokenAddress = useMemo(() => {
     if (!parsedCommand) return null;
     const token = parsedCommand?.parameters?.token;
     if (isAddress(token)) return token;
@@ -157,8 +157,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
   }, [parsedCommand]);
 
   const getRugCheckData = useCallback(async () => {
-    const address = await getTokenAddress();
-    if (!address) {
+    if (!tokenAddress) {
       setLoading(false);
       return null;
     }
@@ -167,7 +166,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
     try {
       const mcpService = getMCPService();
       const result = await mcpService.callTool('SOLSNIFFER_RUGCHECK', {
-        tokenId: address,
+        tokenId: tokenAddress,
       });
       const text = result.content[0].text;
       if (!text) return null;
@@ -181,7 +180,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
     } finally {
       setLoading(false);
     }
-  }, [getTokenAddress]);
+  }, [tokenAddress]);
 
   useEffect(() => {
     getRugCheckData().then(setData);
@@ -232,11 +231,10 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
   }
 
   return (
-    <div className="max-w-[670px] mx-auto">
-      {/* single grid layout for all sections */}
-      <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-4 md:gap-6 auto-rows-auto">
+    <div className="-mt-6 grid grid-cols-1 md:grid-cols-[2fr_3fr]">
+      <div className="flex flex-col items-center">
         {/* token info and price */}
-        <div className="flex flex-col justify-center items-center gap-2 border border-border rounded-2xl p-4">
+        <div className="flex flex-col justify-center items-center gap-2 pt-8 pb-4 md:pr-7">
           {/* token icon */}
           <Avatar className="w-12 h-12">
             <AvatarImage src={data.tokenData.tokenImg} />
@@ -257,15 +255,15 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
         </div>
 
         {/* statistics */}
-        <div className="flex flex-col gap-2.5 border border-border rounded-2xl p-4 justify-center">
+        <div className="w-full flex flex-col gap-2.5 justify-center py-4 md:pr-7">
           {/* address */}
-          <div className="flex justify-between items-center">
-            <div className="text-sm md:text-base text-foreground">Address</div>
+          <div className="flex justify-between items-center gap-2">
+            <div className="text-sm text-foreground">Address</div>
             <div className="flex items-center gap-1">
-              <span className="text-muted-foreground text-sm md:text-base">
+              <span className="text-muted-foreground text-sm">
                 {ellipseAddress(data.tokenData.address)}
               </span>
-              {copied && <span className="text-xs text-green-600 font-medium">Copied!</span>}
+              {copied && <span className="text-xs text-chart-2 font-medium">Copied!</span>}
               <CopyToClipboard
                 text={data.tokenData.address}
                 onCopy={() => {
@@ -276,7 +274,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
                 <Copy
                   className={cn(
                     'w-3 h-3 cursor-pointer transition-colors',
-                    copied ? 'text-green-600' : 'text-muted-foreground hover:text-foreground'
+                    copied ? 'text-chart-2' : 'text-muted-foreground hover:text-foreground'
                   )}
                 />
               </CopyToClipboard>
@@ -284,33 +282,35 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
           </div>
 
           {/* market cap */}
-          <div className="flex justify-between items-center">
-            <div className="text-sm md:text-base text-foreground">Market Cap:</div>
-            <div className="text-sm md:text-base text-foreground text-right">
+          <div className="flex justify-between items-center gap-2">
+            <div className="text-sm text-foreground">Market Cap</div>
+            <div className="text-sm text-foreground text-right">
               {numberIndent(data.tokenInfo.mktCap)}
             </div>
           </div>
 
           {/* total supply */}
-          <div className="flex justify-between items-center">
-            <div className="text-sm md:text-base text-foreground">Total Supply:</div>
-            <div className="text-sm md:text-base text-foreground text-right">
+          <div className="flex justify-between items-center gap-2">
+            <div className="text-sm text-foreground">Total Supply</div>
+            <div className="text-sm text-foreground text-right">
               {numberIndent(data.tokenInfo.supplyAmount)}
             </div>
           </div>
 
           {/* token type */}
-          <div className="flex justify-between items-center">
-            <div className="text-sm md:text-base text-foreground">Token Type:</div>
-            <div className="text-sm md:text-base text-foreground text-right">
+          <div className="flex justify-between items-center gap-2">
+            <div className="text-sm text-foreground">Token Type</div>
+            <div className="text-sm text-foreground text-right">
               {data.tokenData.tokenOverview.type}
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="flex flex-col md:border-l border-border">
         {/* security audit - new row in grid */}
-        <div className="border border-border rounded-2xl p-4 md:p-5 h-max">
-          <div className="text-sm md:text-base text-foreground mb-3.5">Audit:</div>
+        <div className="py-4 md:pl-7 h-max">
+          <div className="text-sm text-foreground mb-3.5">Audit:</div>
           <div className="flex flex-col gap-3">
             {/* audit items */}
             {Object.entries(data.tokenData.auditRisk || {}).map(([key, value]) => (
@@ -320,17 +320,17 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
                 ) : (
                   <CircleXmark className="w-5 h-5 flex-shrink-0" />
                 )}
-                <span className="text-sm md:text-base text-foreground">{key}</span>
+                <span className="text-sm text-foreground">{key}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* risk assessment - aligned with audit */}
-        <div className="border border-border rounded-2xl p-4 h-max">
+        <div className="py-4 md:pl-7 h-max md:border-t border-border">
           <div className="flex justify-between items-center">
-            <div className="text-sm md:text-base text-foreground">Risk Score:</div>
-            <div className="text-sm md:text-base text-foreground">{data.tokenData.score}/100</div>
+            <div className="text-sm text-foreground">Risk Score:</div>
+            <div className="text-sm text-foreground">{data.tokenData.score}/100</div>
           </div>
           {/* indicator details */}
           {transformedIndicatorData.map((item, index) => (
@@ -338,11 +338,11 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
               {!item.value ? (
                 <div
                   className={cn(
-                    'rounded px-3 h-7 flex items-center bg-muted border whitespace-nowrap',
-                    item.level === 'high' && 'border-red-700 text-red-700',
-                    item.level === 'moderate' && 'border-yellow-700 text-yellow-700',
-                    item.level === 'low' && 'border-green-700 text-green-700',
-                    item.level === 'specific' && 'border-gray-700 text-gray-700'
+                    'rounded px-3 h-6 flex items-center whitespace-nowrap text-sm font-semibold',
+                    item.level === 'high' && 'bg-chart-4/10 text-chart-4',
+                    item.level === 'moderate' && 'bg-chart-3/10 text-chart-3',
+                    item.level === 'low' && 'bg-chart-2/10 text-chart-2',
+                    item.level === 'specific' && 'bg-chart-1/10 text-chart-1'
                   )}
                 >
                   {item.level.charAt(0).toUpperCase() + item.level.slice(1)}
@@ -350,7 +350,7 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
               ) : (
                 <CircleCheck className="w-5 h-5 flex-shrink-0" />
               )}
-              <div className={cn('text-sm md:text-base text-foreground', !item.value && 'mt-1')}>
+              <div className={cn('text-sm text-foreground', !item.value && 'mt-0.5')}>
                 {item.title}
               </div>
             </div>
