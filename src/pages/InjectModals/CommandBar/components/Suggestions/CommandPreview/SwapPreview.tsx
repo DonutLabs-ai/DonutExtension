@@ -74,11 +74,10 @@ const SwapPreview: React.FC<SwapPreviewProps> = ({
         inputMint: fromTokenInfo.mint,
         outputMint: toTokenInfo.mint,
         amount: rawAmount,
-        slippageBps: 50,
       })
       .then(q => {
         const outDecimals = toTokenInfo.decimals;
-        setEstimatedOut(toUiAmount(q.outAmount, outDecimals));
+        setEstimatedOut(toUiAmount(q.outputAmount, outDecimals));
       })
       .catch(err => {
         setQuoteError(err?.message || 'Quote error');

@@ -39,8 +39,8 @@ export const commands: CommandOption[] = [
   {
     id: CommandIdType.Swap,
     icon: jupiter,
-    title: 'Swap',
-    description: 'Swap token on Jupiter',
+    title: 'swap',
+    description: 'swap token on Jupiter',
     params: [
       {
         id: 'amount',
@@ -68,8 +68,8 @@ export const commands: CommandOption[] = [
   {
     id: CommandIdType.Send,
     icon: logo,
-    title: 'Send',
-    description: 'Send tokens to an address',
+    title: 'send',
+    description: 'send tokens to an address',
     params: [
       {
         id: 'amount',
@@ -97,8 +97,8 @@ export const commands: CommandOption[] = [
   {
     id: CommandIdType.Price,
     icon: logo,
-    title: 'Price',
-    description: 'Show token price',
+    title: 'price',
+    description: 'show token price',
     params: [
       {
         id: 'token',
@@ -111,8 +111,8 @@ export const commands: CommandOption[] = [
   {
     id: CommandIdType.Chart,
     icon: logo,
-    title: 'Chart',
-    description: 'Show a price chart',
+    title: 'chart',
+    description: 'show a price chart',
     params: [
       {
         id: 'token',
@@ -126,8 +126,8 @@ export const commands: CommandOption[] = [
   {
     id: CommandIdType.RugCheck,
     icon: solsniffer,
-    title: 'RugCheck',
-    description: 'Analyze sol token on Solsniffer',
+    title: 'rugCheck',
+    description: 'analyze sol token on Solsniffer',
     params: [
       {
         id: 'token',

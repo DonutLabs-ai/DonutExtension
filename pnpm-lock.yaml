@@ -86,9 +86,6 @@ importers:
       downshift:
         specifier: ^9.0.9
         version: 9.0.9(react@18.3.1)
-      hotkeys-js:
-        specifier: ^3.13.9
-        version: 3.13.9
       lightweight-charts:
         specifier: ^5.0.7
         version: 5.0.7
@@ -3936,9 +3933,6 @@ packages:
 
   hookified@1.8.2:
     resolution: {integrity: sha512-5nZbBNP44sFCDjSoB//0N7m508APCgbQ4mGGo1KJGBYyCKNHfry1Pvd0JVHZIxjdnqn8nFRBAN/eFB6Rk/4w5w==}
-
-  hotkeys-js@3.13.9:
-    resolution: {integrity: sha512-3TRCj9u9KUH6cKo25w4KIdBfdBfNRjfUwrljCLDC2XhmPDG0SjAZFcFZekpUZFmXzfYoGhFDcdx2gX/vUVtztQ==}
 
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
@@ -12612,8 +12606,6 @@ snapshots:
   hookable@5.5.3: {}
 
   hookified@1.8.2: {}
-
-  hotkeys-js@3.13.9: {}
 
   html-escaper@3.0.3: {}
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -19,7 +19,7 @@ import { useCommandParser } from '../hooks/useCommandParser';
 import { useTokenNodeHandler } from '../hooks/useTokenNodeHandler';
 import { useSuggestionHandler } from '../hooks/useSuggestionHandler';
 import { useAiSuggestion } from '../hooks/useAiSuggestion';
-import { getShadowRootContainer } from '@/entrypoints/content';
+import { createSlashKeyProtection, KeyboardProtectionInstance } from '../utils/keyboardProtection';
 
 interface TiptapEditorProps {
   className?: string;
@@ -42,6 +42,8 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
   const { processTokenNodes, calculateNextParamNeedingSuggestion } = useTokenNodeHandler();
   const { determineSuggestionType } = useSuggestionHandler();
   const { applySuggestion } = useAiSuggestion();
+
+  const keyboardProtectionRef = useRef<KeyboardProtectionInstance | null>(null);
 
   /**
    * Handler for command updates
@@ -261,40 +263,41 @@ const TiptapEditor: React.FC<TiptapEditorProps> = ({ className }) => {
     editor.setEditable(!isExecuting);
   }, [editor, isExecuting]);
 
-  // Add Shadow Root level event protection
   useEffect(() => {
     if (!editor) return;
 
-    const shadowContainer = getShadowRootContainer();
-    if (!shadowContainer) return;
+    const editorElement = editor.view.dom;
+    if (!editorElement) return;
 
-    // Create protective event handler for slash key
-    const handleShadowKeyDown = (event: KeyboardEvent) => {
-      if (event.key === '/' && event.target instanceof HTMLElement) {
-        // Check if the event target is within our editor
-        const editorElement = editor.view.dom;
-        if (
-          editorElement &&
-          (editorElement.contains(event.target) || editorElement === event.target)
-        ) {
-          // Stop propagation to prevent page-level handlers from interfering
-          event.stopPropagation();
-          event.stopImmediatePropagation();
-        }
+    const getSuggestionState = () => {
+      const store = useTiptapCommandBarStore.getState();
+      return {
+        isShowingSuggestions: store.activeSuggestion !== SuggestionType.None,
+        suggestionType: store.activeSuggestion || 'None',
+      };
+    };
+
+    const keyboardProtection = createSlashKeyProtection(editorElement, editor, getSuggestionState);
+
+    keyboardProtectionRef.current = keyboardProtection;
+
+    const handleSlashInsertion = () => {
+      const content = editorElement.textContent || '';
+      if (content.endsWith('/')) {
+        updateMultipleStates({
+          activeSuggestion: SuggestionType.Command,
+        });
       }
     };
 
-    // Add event listener to shadow root with capture phase
-    shadowContainer.addEventListener('keydown', handleShadowKeyDown, {
-      capture: true,
-      passive: false,
-    });
+    editorElement.addEventListener('input', handleSlashInsertion);
 
-    // Cleanup
     return () => {
-      shadowContainer.removeEventListener('keydown', handleShadowKeyDown, { capture: true });
+      keyboardProtection.destroy();
+      keyboardProtectionRef.current = null;
+      editorElement.removeEventListener('input', handleSlashInsertion);
     };
-  }, [editor]);
+  }, [editor, updateMultipleStates]);
 
   return (
     <div className={cn('relative w-full', className)}>

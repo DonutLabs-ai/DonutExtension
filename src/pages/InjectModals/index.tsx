@@ -1,22 +1,51 @@
-import { useState, useEffect } from 'react';
-import hotkeys from 'hotkeys-js';
+import { useState, useEffect, useRef } from 'react';
 import CommandBar from './TiptapCommandBar';
 import { ToastProvider } from '@/components/ToastProvider';
+import { createGlobalShortcuts, GlobalShortcutManager } from '@/utils/globalShortcuts';
 
 const InjectModals = () => {
   const [open, setOpen] = useState(false);
+  const globalShortcutsRef = useRef<GlobalShortcutManager | null>(null);
 
   useEffect(() => {
-    hotkeys('ctrl+k,cmd+k', e => {
-      e.preventDefault();
-      setOpen(o => !o);
+    // Create global shortcut protection manager
+    const globalShortcuts = createGlobalShortcuts({
+      shortcuts: [
+        {
+          key: 'ctrl+k',
+          callback: e => {
+            e.preventDefault();
+            setOpen(o => !o);
+          },
+          description: 'Toggle command bar with Ctrl+K',
+        },
+        {
+          key: 'cmd+k',
+          callback: e => {
+            e.preventDefault();
+            setOpen(o => !o);
+          },
+          description: 'Toggle command bar with Cmd+K',
+        },
+        {
+          key: 'escape',
+          callback: e => {
+            setOpen(false);
+          },
+          description: 'Close command bar with Escape',
+        },
+      ],
+      debug: false,
     });
-    hotkeys('esc', () => {
-      setOpen(false);
-    });
+
+    globalShortcutsRef.current = globalShortcuts;
+
     return () => {
-      hotkeys.unbind('ctrl+k,cmd+k');
-      hotkeys.unbind('esc');
+      // Clean up global shortcut manager
+      if (globalShortcutsRef.current) {
+        globalShortcutsRef.current.destroy();
+        globalShortcutsRef.current = null;
+      }
     };
   }, []);
 

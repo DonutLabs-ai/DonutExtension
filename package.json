@@ -47,7 +47,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "downshift": "^9.0.9",
-    "hotkeys-js": "^3.13.9",
     "lightweight-charts": "^5.0.7",
     "lucide-react": "^0.503.0",
     "nanoid": "^5.1.5",

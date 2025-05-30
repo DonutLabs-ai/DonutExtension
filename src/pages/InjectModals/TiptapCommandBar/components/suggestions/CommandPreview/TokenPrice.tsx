@@ -89,8 +89,8 @@ const TokenPrice = () => {
       const json = JSON.parse(text);
       if (json.status === 'success' && json.supportedTokens?.length > 0) {
         const marketData: Record<string, any> = {};
-        json.supportedTokens.forEach((token: any) => {
-          marketData[token.symbol.toLowerCase()] = token;
+        json.supportedTokens.forEach((token: any, index: number) => {
+          marketData[mints[index]] = token;
         });
         return marketData;
       }
@@ -102,16 +102,15 @@ const TokenPrice = () => {
   }, []);
 
   const convertToken = useCallback(
-    (token: any, marketData: Record<string, any> = {}): TokenData => {
-      const tokenSymbol = (token.symbol || '').toLowerCase();
-      const marketInfo = marketData[tokenSymbol];
+    (mint: string, marketData: Record<string, any> = {}): TokenData => {
+      const marketInfo = marketData[mint];
 
       return {
-        mint: token.mint,
-        symbol: token.symbol.toUpperCase(),
-        name: token.name,
-        logoURI: token.logoURI,
-        current_price: marketInfo?.current_price || parseFloat(token.price) || 0,
+        mint,
+        symbol: marketInfo.symbol.toUpperCase(),
+        name: marketInfo.name,
+        logoURI: marketInfo.image,
+        current_price: marketInfo?.current_price || 0,
         price_change_percentage_24h: marketInfo?.price_change_percentage_24h || 0,
       };
     },
@@ -137,7 +136,7 @@ const TokenPrice = () => {
 
   // Main functions
   const loadWatchListTokens = useCallback(async () => {
-    const { tokens, priceWatchList } = getStoreData();
+    const { priceWatchList } = getStoreData();
 
     if (priceWatchList.length === 0) {
       setWatchListTokens([]);
@@ -147,12 +146,9 @@ const TokenPrice = () => {
     setLoading(true);
 
     try {
-      const watchedTokens = priceWatchList.map(mint => tokens[mint]).filter(Boolean);
-
-      if (watchedTokens.length > 0) {
-        const mints = watchedTokens.map(t => t.mint);
-        const marketData = await fetchTokenPrices(mints);
-        const enrichedTokens = watchedTokens.map(token => convertToken(token, marketData));
+      if (priceWatchList.length > 0) {
+        const marketData = await fetchTokenPrices(priceWatchList);
+        const enrichedTokens = priceWatchList.map(mint => convertToken(mint, marketData));
         setWatchListTokens(enrichedTokens);
       } else {
         setWatchListTokens([]);
@@ -171,7 +167,6 @@ const TokenPrice = () => {
       setLoading(true);
 
       try {
-        const { tokens } = getStoreData();
         let results: TokenData[] = [];
 
         if (isAddress(query)) {
@@ -179,10 +174,11 @@ const TokenPrice = () => {
           const marketData = await fetchTokenPrices([query]);
           const marketToken = Object.values(marketData)[0];
           if (marketToken) {
-            results = [convertToken({ ...marketToken, mint: query }, marketData)];
+            results = [convertToken(query, marketData)];
           }
         } else {
           // Search by name/symbol
+          const { tokens } = getStoreData();
           const filteredTokens = Object.values(tokens)
             .filter(
               token =>
@@ -194,7 +190,7 @@ const TokenPrice = () => {
           if (filteredTokens.length > 0) {
             const mints = filteredTokens.map(t => t.mint);
             const marketData = await fetchTokenPrices(mints);
-            results = filteredTokens.map(token => convertToken(token, marketData));
+            results = mints.map(mint => convertToken(mint, marketData));
           }
         }
 
@@ -215,12 +211,12 @@ const TokenPrice = () => {
     if (tokensToRefresh.length === 0) return;
 
     try {
-      const symbols = tokensToRefresh.map(token => token.symbol.toLowerCase());
-      const marketData = await fetchTokenPrices(symbols);
+      const mints = tokensToRefresh.map(token => token.mint);
+      const marketData = await fetchTokenPrices(mints);
 
       const updateTokens = (tokens: TokenData[]) =>
         tokens.map(token => {
-          const marketInfo = marketData[token.symbol.toLowerCase()];
+          const marketInfo = marketData[token.mint];
           if (marketInfo) {
             return {
               ...token,
@@ -297,7 +293,7 @@ const TokenPrice = () => {
       <div key={`${token.mint}-${forceUpdate}`} className="flex items-center gap-2 py-1">
         <StarIcon isFavorited={isWatched} onClick={() => toggleWatchList(token.mint)} />
 
-        <Avatar className="w-5 h-5">
+        <Avatar className="w-5 h-5 rounded-sm">
           <AvatarImage src={token.logoURI} alt={token.symbol} />
           <AvatarFallback className="text-xs bg-muted text-muted-foreground">
             {token.symbol?.charAt(0) || '?'}
