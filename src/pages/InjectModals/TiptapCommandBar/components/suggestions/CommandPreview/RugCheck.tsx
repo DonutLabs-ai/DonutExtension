@@ -82,11 +82,16 @@ const RugCheckSkeleton = () => {
       <div className="flex flex-col items-center">
         {/* token info and price skeleton */}
         <div className="flex flex-col justify-center items-center gap-2 pt-8 pb-4 md:pr-7">
-          {/* token icon skeleton */}
-          <Skeleton className="w-12 h-12 rounded-full" />
+          <div className="flex items-center gap-2">
+            {/* token icon skeleton */}
+            <Skeleton className="size-6 rounded-full" />
 
-          {/* token name skeleton */}
-          <Skeleton className="w-32 h-4" />
+            {/* token name skeleton */}
+            <Skeleton className="w-20 h-4" />
+          </div>
+
+          {/* token symbol skeleton */}
+          <Skeleton className="w-10 h-3.5" />
 
           {/* token price skeleton */}
           <Skeleton className="w-20 h-6" />
@@ -206,7 +211,14 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
 
         Object.entries(parsedDetails).forEach(([title, value]) => {
           if (typeof value === 'boolean') {
-            items.push({ title, value, level });
+            let formatLevel = level;
+            if (level === 'high') formatLevel = 'High';
+            if (level === 'moderate') formatLevel = 'Med';
+            if (level === 'low') formatLevel = 'Low';
+            if (level === 'specific') formatLevel = 'Specific';
+            if (value) formatLevel = 'Safe';
+
+            items.push({ title, value, level: formatLevel });
           }
         });
       } catch (error) {
@@ -235,22 +247,27 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
       <div className="flex flex-col items-center">
         {/* token info and price */}
         <div className="flex flex-col justify-center items-center gap-2 pt-8 pb-4 md:pr-7">
-          {/* token icon */}
-          <Avatar className="w-12 h-12">
-            <AvatarImage src={data.tokenData.tokenImg} />
-            <AvatarFallback>{data.tokenData.tokenSymbol.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className="flex items-center gap-2">
+            {/* token icon */}
+            <Avatar className="size-6">
+              <AvatarImage src={data.tokenData.tokenImg} />
+              <AvatarFallback>{data.tokenData.tokenSymbol.charAt(0)}</AvatarFallback>
+            </Avatar>
 
-          {/* token name */}
-          <div className="font-semibold text-base text-foreground text-center">
-            {data.tokenData.tokenName} ${data.tokenData.tokenSymbol}
+            {/* token name */}
+            <div className="font-semibold text-base text-foreground text-center">
+              {data.tokenData.tokenName}
+            </div>
+          </div>
+
+          {/* token symbol */}
+          <div className="font-normal text-sm text-foreground text-center">
+            ${data.tokenData.tokenSymbol}
           </div>
 
           {/* token price */}
-          <div className="flex flex-col items-center">
-            <span className="font-bold text-xl md:text-2xl text-foreground">
-              ${numberIndent(data.tokenInfo.price)}
-            </span>
+          <div className="font-semibold text-xl text-foreground text-center">
+            ${numberIndent(data.tokenInfo.price)}
           </div>
         </div>
 
@@ -334,25 +351,20 @@ const RugCheck: React.FC<RugCheckProps> = ({ parsedCommand }) => {
           </div>
           {/* indicator details */}
           {transformedIndicatorData.map((item, index) => (
-            <div key={index} className="flex gap-4 mt-3">
-              {!item.value ? (
-                <div
-                  className={cn(
-                    'rounded px-3 h-6 flex items-center whitespace-nowrap text-sm font-semibold',
-                    item.level === 'high' && 'bg-chart-4/10 text-chart-4',
-                    item.level === 'moderate' && 'bg-chart-3/10 text-chart-3',
-                    item.level === 'low' && 'bg-chart-2/10 text-chart-2',
-                    item.level === 'specific' && 'bg-chart-1/10 text-chart-1'
-                  )}
-                >
-                  {item.level.charAt(0).toUpperCase() + item.level.slice(1)}
-                </div>
-              ) : (
-                <CircleCheck className="w-5 h-5 flex-shrink-0" />
-              )}
-              <div className={cn('text-sm text-foreground', !item.value && 'mt-0.5')}>
-                {item.title}
+            <div key={index} className="flex items-baseline gap-4 mt-3">
+              <div
+                className={cn(
+                  'rounded w-14 h-6 flex items-center justify-center whitespace-nowrap text-sm font-semibold',
+                  item.level === 'High' && 'bg-[#D10505]/30 text-[#FF9595]',
+                  item.level === 'Med' && 'bg-[#D16105]/30 text-[#FFD195]',
+                  item.level === 'Low' && 'bg-[#05D137]/30 text-[#82F1AB]',
+                  item.level === 'Specific' && 'bg-[#8126D0]/30 text-[#C4A1FF]',
+                  item.level === 'Safe' && 'bg-[#055ED1]/30 text-[#82D9F1]'
+                )}
+              >
+                {item.level}
               </div>
+              <div className="text-sm text-foreground">{item.title}</div>
             </div>
           ))}
         </div>
